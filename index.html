@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>학습 탐색기</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#fff;--fg:#111;--mu:#666;--bd:#ddd;--cd:#f6f6f7;--ac:#1a56db;--er:#c0392b}
+@media(prefers-color-scheme:dark){:root{--bg:#121212;--fg:#eee;--mu:#9a9a9a;--bd:#333;--cd:#1c1c1e;--ac:#6ea0ff;--er:#ff7a6b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Noto Sans KR",sans-serif}
+.w{max-width:1200px;margin:0 auto;padding:0 12px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:8px 0}
+form,#bar,#sorts{display:flex;gap:6px}
+#bar{margin-top:6px;justify-content:space-between;align-items:flex-start}
+#sorts{flex-wrap:wrap}
+input,textarea,button{font:inherit;color:var(--fg)}
+input,textarea{background:var(--cd);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;width:100%}
+#q{flex:1;font-size:16px}
+button{background:var(--cd);border:1px solid var(--bd);border-radius:8px;padding:7px 11px;cursor:pointer}
+#sorts button{font-size:13px;padding:6px 9px}
+button.on{border-color:var(--ac);color:var(--ac)}
+#set{padding:8px 12px 12px;border-bottom:1px solid var(--bd)}
+#set label{display:block;margin:8px 0 3px;font-size:13px;color:var(--mu)}
+#set .r{display:flex;gap:6px;margin-top:8px}
+#top{padding-top:8px;padding-bottom:8px}
+#msg{color:var(--er);font-weight:600}
+#msg.ld{color:var(--mu)}
+.sm{font-size:12px;color:var(--mu);margin-top:2px}
+#list{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));padding-bottom:24px}
+.card{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:8px;border-radius:10px;background:var(--cd)}
+.card img{flex:none;width:38%;max-width:168px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:var(--bd)}
+.tx{display:block;min-width:0;flex:1}
+.tt{font-weight:600;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.mt,.st,.nb{display:block;font-size:12.5px;margin-top:3px;word-break:break-word}
+.mt{color:var(--mu)}
+.nb{color:var(--ac)}
+body:has(#md[open]){overflow:hidden}
+#md{border:0;margin:0;padding:12px;width:100%;height:100%;max-width:100%;max-height:100%;background:rgba(0,0,0,.75);color:inherit}
+#md:not([open]){display:none}
+#md[open]{display:flex;align-items:center;justify-content:center}
+.bx{width:min(960px,100%);max-height:100%;overflow:auto;padding:10px;border-radius:10px;background:var(--bg)}
+.bh{display:flex;justify-content:flex-end;margin-bottom:8px}
+#pl{width:100%;aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center}
+#pl iframe{width:100%;height:100%;border:0}
+#pl p{color:#fff;margin:0;padding:12px;text-align:center}
+#mtl{font-weight:600;margin:10px 0 6px;word-break:break-word}
+#yt{color:var(--ac)}
+</style>
+</head>
+<body>
+<header><div class="w">
+<form id="f"><input id="q" type="search" placeholder="검색어" autocomplete="off" enterkeyhint="search"><button>검색</button></form>
+<div id="bar"><div id="sorts"><button type="button" data-k="subs"></button><button type="button" data-k="views"></button><button type="button" data-k="ratio"></button></div><button type="button" id="gr" aria-label="설정">⚙</button></div>
+</div></header>
+<section id="set" hidden><div class="w">
+<label for="k">YouTube Data API 키 (이 브라우저에만 저장)</label>
+<input id="k" type="password" autocomplete="off" spellcheck="false" autocapitalize="off">
+<label for="w">제외 단어 (한 줄에 하나, 제목에 포함되면 숨김)</label>
+<textarea id="w" rows="6" spellcheck="false"></textarea>
+<div class="r"><button type="button" id="sv">완료</button><button type="button" id="rs">기본 단어</button></div>
+</div></section>
+<main class="w">
+<div id="top"><div id="msg"></div><div id="inf"></div>
+<div class="sm"><span id="cnt"></span><br>프로젝트 기본 한도: 하루 100회, 다른 기기와 공유 · 태평양 시간 자정(한국 시간 약 16~17시)에 초기화 · 정렬은 가져온 결과 안에서만 적용</div></div>
+<div id="list"></div>
+</main>
+<dialog id="md" aria-labelledby="mtl"><div class="bx">
+<div class="bh"><button type="button" id="x">✕ 닫기</button></div>
+<div id="pl"></div><div id="mtl"></div><a id="yt" target="_blank" rel="noopener noreferrer"></a>
+</div></dialog>
+<script>
+const DEF_EX=["#shorts","#광고","유료광고","유료 광고","#협찬"];
+const ok=v=>typeof v==="number"&&isFinite(v);
+const isoSec=d=>{const m=/^P(?=\d|T\d)(?:(\d+)D)?(?:T(?=\d)(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/.exec(typeof d==="string"?d:"");return m?(+m[1]||0)*86400+(+m[2]||0)*3600+(+m[3]||0)*60+(+m[4]||0):null};
+const fmtKo=n=>{if(!ok(n)||n<0)return"N/A";if(n<1e4)return String(Math.floor(n));const u=n>=1e8?1e8:1e4,s=n>=1e8?"억":"만",v=n/u;return(v>=100?String(Math.floor(v)):(Math.floor(n*10/u)/10).toFixed(1).replace(/\.0$/,""))+s};
+const fmtRatio=r=>ok(r)&&r>=0?"×"+(Math.floor(r*10)/10).toFixed(1):"N/A";
+const normWords=a=>[...new Set((Array.isArray(a)?a:[]).filter(s=>typeof s==="string").map(s=>s.trim().toLowerCase()).filter(Boolean))];
+const keep=(v,w)=>{const s=isoSec(v.contentDetails&&v.contentDetails.duration),sn=v.snippet||{},t=(sn.title||"").toLowerCase();return sn.liveBroadcastContent==="none"&&(s===null||s>180)&&!w.some(x=>t.includes(x))};
+const num=v=>{if(typeof v==="string")v=/^\d+$/.test(v)?+v:null;return ok(v)&&v>=0?v:null};
+const subs=c=>{if(!c||c.hiddenSubscriberCount)return null;const n=num(c.subscriberCount);return n>0?n:null};
+const ratio=(v,c)=>{const s=subs(c),n=num(v);return s&&n!==null?n/s:null};
+const sortBy=(a,k,d)=>a.slice().sort((p,q)=>{const x=k(p),y=k(q);if(!ok(x)&&!ok(y))return 0;if(!ok(x))return 1;if(!ok(y))return -1;return d==="asc"?x-y:y-x});
+const nextSort=(s,k)=>s&&s.key===k?{key:k,dir:s.dir==="desc"?"asc":"desc"}:{key:k,dir:"desc"};
+const KEYS={__proto__:null,subs:r=>subs(r.c),views:r=>num(r.v.statistics&&r.v.statistics.viewCount),ratio:r=>ratio(r.v.statistics&&r.v.statistics.viewCount,r.c)};
+const view=(rows,w,s)=>{const l=rows.filter(r=>keep(r.v,w)),k=s&&KEYS[s.key];return{list:k?sortBy(l,k,s.dir):l,ex:rows.length-l.length,n:rows.length}};
+
+const B="https://www.googleapis.com/youtube/v3/";
+const reasons=l=>(Array.isArray(l)?l:[]).map(x=>x&&x.reason).filter(x=>typeof x==="string");
+const MS=[
+[["keyinvalid","api_key_invalid"],"API 키가 올바르지 않습니다. 설정에서 확인하세요."],
+[["iprefererblocked","api_key_http_referrer_blocked"],"이 주소에서 키 사용이 막혔습니다. 키의 리퍼러 제한을 확인하세요."],
+[["accessnotconfigured","service_disabled"],"YouTube Data API v3가 꺼져 있습니다. Cloud 콘솔에서 사용 설정하세요."],
+[["quotaexceeded","dailylimitexceeded"],"오늘 할당량을 다 썼습니다. 태평양 시간 자정에 초기화됩니다."]];
+const cls=l=>{for(const x of l){const k=MS.find(([ks])=>ks.includes(x.toLowerCase()));if(k)return k[1]}};
+const errMsg=e=>{if(!e||e.net)return"네트워크 오류입니다. 연결을 확인하세요.";const a=e.rs||[],d=e.ds||[],m=cls(a)||cls(d);if(m)return m;if(e.bad)return"응답을 해석하지 못했습니다. 잠시 뒤 다시 시도하세요.";return"요청에 실패했습니다. 잠시 뒤 다시 시도하세요. ("+String(a[0]||d[0]||e.st||"?").slice(0,40)+")"};
+const get=async(F,p,a)=>{let r;try{r=await F(B+p+"?"+new URLSearchParams(a))}catch(x){throw{net:1}}let j=null;try{j=await r.json()}catch(x){}const er=j&&j.error;if(!r.ok||er)throw{rs:reasons(er&&er.errors),ds:reasons(er&&er.details),st:r.status};if(!j||typeof j!=="object"||Array.isArray(j)||("items"in j&&!Array.isArray(j.items)))throw{bad:1,st:r.status};return j};
+const fetchAll=async(F,q,key,o={},live=()=>true)=>{
+if(o.onSearch)o.onSearch();
+const s=await get(F,"search",{part:"snippet",type:"video",q,maxResults:50,regionCode:"KR",relevanceLanguage:"ko",order:"relevance",key});
+if(!live())return null;
+const ids=[...new Set((s.items||[]).map(i=>i.id&&i.id.videoId).filter(Boolean))];
+if(!ids.length)return[];
+const v=await get(F,"videos",{part:"snippet,contentDetails,statistics,status",id:ids.join(","),key});
+if(!live())return null;
+const ix=new Map(ids.map((d,i)=>[d,i])),vs=(v.items||[]).sort((a,b)=>ix.get(a.id)-ix.get(b.id)),cs=[...new Set(vs.map(x=>x.snippet&&x.snippet.channelId).filter(Boolean))],m={};
+if(cs.length){const c=await get(F,"channels",{part:"statistics",id:cs.join(","),key});if(!live())return null;for(const x of c.items||[])m[x.id]=x.statistics}
+return vs.map(x=>({v:x,c:m[x.snippet&&x.snippet.channelId]}))};
+const mkRun=(F,ui,X={})=>{let n=0;return async(q,key,o)=>{const i=++n,live=()=>i===n;q=String(q||"").trim();key=String(key||"").trim();const m=!key?"API 키를 설정하세요.":!q?"검색어를 입력하세요.":"";if(m){ui.fail(m);ui.load(false);return}const h=X.cache&&X.cache.get(q);if(h){ui.done(h);ui.load(false);return}ui.load(true);try{const d=await fetchAll(F,q,key,{...o,onSearch:()=>{X.count&&X.count.inc();o&&o.onSearch&&o.onSearch()}},live);if(d&&live()){X.cache&&X.cache.set(q,d);ui.done(d)}}catch(e){if(live())ui.fail(errMsg(e))}finally{if(live())ui.load(false)}}};
+
+const laDay=t=>{const p=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(t).map(x=>[x.type,x.value]));return p.year+"-"+p.month+"-"+p.day};
+const store=n=>{try{const s=globalThis[n];s.getItem("_");return s}catch(e){return null}};
+const mkCache=(st,now=Date.now,ttl=18e5,max=8)=>{
+const P="yx:c:",mem=new Map();
+const key=(q,t)=>P+String(q).trim().toLowerCase().replace(/\s+/g," ")+"|"+(t||"");
+const parse=s=>{try{const v=JSON.parse(s);return v&&typeof v.t==="number"&&"d"in v?v:null}catch(e){return null}};
+const rd=k=>{try{return parse(st.getItem(k))}catch(e){return null}};
+const dead=v=>!v||now()-v.t>=ttl||v.t>now();
+const keys=()=>{const a=[];try{for(let i=0;i<st.length;i++){const k=st.key(i);if(k&&k.startsWith(P))a.push(k)}}catch(e){}return a};
+const del=k=>{try{st.removeItem(k)}catch(e){}mem.delete(k)};
+const gone=k=>{try{return st.getItem(k)===null}catch(e){return false}};
+const old=()=>{let b=null,bt=Infinity;for(const k of keys()){const v=rd(k);if(!v){b=k;break}if(v.t<bt){bt=v.t;b=k}}if(b===null)return false;del(b);return gone(b)};
+const prune=()=>{let a=keys().map(k=>[k,rd(k)]);for(const[k,v]of a)if(dead(v))del(k);a=a.filter(([k,v])=>!dead(v));a.sort((x,y)=>x[1].t-y[1].t);while(a.length>=max)del(a.shift()[0])};
+return{
+get:(q,t)=>{const k=key(q,t),v=parse(mem.get(k))||rd(k);if(dead(v)){if(v)del(k);return undefined}return v.d},
+set:(q,d,t)=>{const k=key(q,t);let s;try{s=JSON.stringify({t:now(),d})}catch(e){return}del(k);prune();for(let i=0;i<=max;i++){try{st.setItem(k,s);return}catch(e){if(!old())break}}if(mem.size>=max)mem.delete(mem.keys().next().value);mem.set(k,s)}}};
+const mkCount=(st,now=Date.now)=>{const K="yx:n";let m=null;const day=()=>laDay(now());
+const rd=()=>{let s=0;try{const v=JSON.parse(st.getItem(K));if(v&&v.d===day()&&Number.isInteger(v.c)&&v.c>=0)s=v.c}catch(e){}return Math.max(s,m&&m.d===day()?m.c:0)};
+return{get:rd,inc:()=>{const c=rd()+1;m={d:day(),c};try{st.setItem(K,JSON.stringify(m))}catch(e){}return c}}};
+
+const $=s=>document.querySelector(s);
+const mk=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const LS=store("localStorage"),mm={};
+const gs=k=>{let v=null;try{v=LS.getItem(k)}catch(e){}return v!==null?v:(k in mm?mm[k]:null)};
+const ss=(k,v)=>{mm[k]=v;try{LS.setItem(k,v)}catch(e){}};
+const lw=()=>{try{const a=JSON.parse(gs("yx:ex"));if(Array.isArray(a))return normWords(a)}catch(e){}return normWords(DEF_EX)};
+const L={subs:"구독자수",views:"조회수",ratio:"조회수÷구독자수"};
+const cache=mkCache(LS),count=mkCount(LS);
+const sweep=()=>{if(!LS)return;const P="yx:c:",t=Date.now();for(let i=LS.length-1;i>=0;i--){const k=LS.key(i);if(!k||!k.startsWith(P))continue;let v=null;try{v=JSON.parse(LS.getItem(k))}catch(e){}if(!v||typeof v.t!=="number"||t-v.t>=18e5||v.t>t)try{LS.removeItem(k)}catch(e){}}};
+let words=lw(),apiKey=gs("yx:key")||"",rows=null,sort=null,pq="",lq="";
+const fmtDur=s=>{if(s===null)return"";const h=Math.floor(s/3600),m=Math.floor(s%3600/60),c=s%60,p=n=>String(n).padStart(2,"0");return h?h+":"+p(m)+":"+p(c):m+":"+p(c)};
+const card=r=>{const v=r.v,sn=v.snippet||{},b=mk("button","card"),im=mk("img"),t=mk("span","tx");
+b.type="button";b.title=sn.title||"";im.loading="lazy";im.alt="";im.src="https://i.ytimg.com/vi/"+encodeURIComponent(v.id)+"/mqdefault.jpg";
+t.append(mk("span","tt",sn.title||""),
+mk("span","mt",[sn.channelTitle,fmtDur(isoSec(v.contentDetails&&v.contentDetails.duration)),(sn.publishedAt||"").slice(0,10)].filter(Boolean).join(" · ")),
+mk("span","st","조회 "+fmtKo(KEYS.views(r))+" · 구독 "+fmtKo(KEYS.subs(r))+" · "+fmtRatio(KEYS.ratio(r))));
+if(v.status&&v.status.embeddable===false)t.append(mk("span","nb","↗ YouTube에서 재생"));
+b.append(im,t);b.onclick=()=>play(r);return b};
+const render=()=>{
+document.querySelectorAll("#sorts button").forEach(b=>{const k=b.dataset.k,on=!!sort&&sort.key===k;b.textContent=L[k]+(on?(sort.dir==="desc"?" ▼":" ▲"):"");b.classList.toggle("on",on)});
+const li=$("#list"),inf=$("#inf");li.textContent="";
+if(!rows){inf.textContent=rows===null?"검색어를 입력하고 검색을 누르세요.":"";return}
+const r=view(rows,words,sort);
+const p=lq?"“"+lq+"” · ":"";
+if(!r.n){inf.textContent=p+"검색 결과 없음";return}
+inf.textContent=p+(r.list.length?"필터로 "+r.ex+"개 제외됨 · "+r.list.length+"개 표시":"필터로 모두 제외됨 ("+r.ex+"개)");
+li.append(...r.list.map(card))};
+const updC=()=>{$("#cnt").textContent="이 브라우저에서 오늘 요청한 검색: "+count.get()+"회"};
+const msg=(t,c)=>{const e=$("#msg");e.textContent=t;e.className=c||""};
+const ui={
+load:b=>{if(b){rows=undefined;render();msg("검색 중…","ld")}else if($("#msg").className==="ld")msg("");updC()},
+done:d=>{rows=d;lq=pq;msg("");render();updC()},
+fail:m=>{msg(m);updC()}};
+const F=u=>fetch(u),run=mkRun(F,ui,{cache,count});
+const play=r=>{const v=r.v,e=!(v.status&&v.status.embeddable===false),pl=$("#pl"),t=(v.snippet||{}).title||"";
+pl.textContent="";
+if(e){const f=mk("iframe");f.src="https://www.youtube.com/embed/"+encodeURIComponent(v.id)+"?rel=0&playsinline=1&autoplay=1";f.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";f.allowFullscreen=true;f.referrerPolicy="strict-origin-when-cross-origin";f.title=t;pl.append(f)}
+else pl.append(mk("p",0,"이 영상은 임베드가 막혀 있습니다."));
+$("#mtl").textContent=t;const a=$("#yt");a.href="https://www.youtube.com/watch?v="+encodeURIComponent(v.id);a.textContent=e?"YouTube에서 열기":"YouTube에서 재생";const m=$("#md");if(m.showModal)m.showModal();else m.setAttribute("open","")};
+const shut=()=>{$("#pl").textContent="";const m=$("#md");if(m.close)m.close();else m.removeAttribute("open")};
+const gear=()=>{const s=$("#set");if(s.hidden){$("#k").value=apiKey;$("#w").value=words.join("\n")}s.hidden=!s.hidden;if(!s.hidden&&!apiKey)$("#k").focus()};
+$("#f").onsubmit=e=>{e.preventDefault();if(!apiKey)gear_open();pq=$("#q").value.trim();run($("#q").value,apiKey,{onSearch:updC});$("#q").blur()};
+const gear_open=()=>{if($("#set").hidden)gear()};
+$("#gr").onclick=gear;
+const apW=()=>{words=normWords($("#w").value.split("\n"));ss("yx:ex",JSON.stringify(words));render()};
+$("#k").oninput=()=>{apiKey=$("#k").value.trim();ss("yx:key",apiKey)};
+$("#w").oninput=apW;
+$("#sv").onclick=()=>{$("#set").hidden=true;if($("#msg").className!=="ld")msg("")};
+$("#rs").onclick=()=>{$("#w").value=normWords(DEF_EX).join("\n");apW()};
+document.querySelectorAll("#sorts button").forEach(b=>b.onclick=()=>{sort=nextSort(sort,b.dataset.k);render()});
+$("#x").onclick=shut;
+$("#md").onclick=e=>{if(e.target===e.currentTarget)shut()};
+$("#md").onclose=()=>{$("#pl").textContent=""};
+setInterval(updC,6e4);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)updC()});
+addEventListener("focus",updC);addEventListener("pageshow",updC);
+sweep();render();updC();if(!apiKey)gear();
+</script>
+</body>
+</html>
