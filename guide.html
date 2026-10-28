@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>학습 탐색기 설치 안내</title>
+<style>
+/* 레이아웃: 좁은 단일 칼럼. 상단에 진행바, 본문은 '컴퓨터/폰' 꼬리표가 붙은 큰 단계 카드. 넉넉한 여백·큰 글씨로 비전문가가 따라가기 쉽게 */
+:root{
+  color-scheme:light;
+  --bg:#f6f8fa; --surface:#ffffff; --surface2:#eef2f6; --line:#e3e8ee;
+  --fg:#181c22; --mu:#525a65; --faint:#889099;
+  --accent:#0f8a4d; --on-accent:#ffffff; --accent-weak:#e4f5ec;
+  --warn:#8a5a00; --warn-weak:#fcf1d6; --warn-line:#eccb7a;
+  --danger:#c3362b;
+  --r:16px;
+  --f:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Segoe UI",sans-serif;
+  --f-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0e1113; --surface:#171b1e; --surface2:#1f2529; --line:#2c333a;
+  --fg:#eaeef2; --mu:#9aa3ad; --faint:#687079;
+  --accent:#3ddc84; --on-accent:#07140c; --accent-weak:#123224;
+  --warn:#f0c04a; --warn-weak:#352c12; --warn-line:#5c4a1c;
+  --danger:#ff7a6b;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1113; --surface:#171b1e; --surface2:#1f2529; --line:#2c333a;
+  --fg:#eaeef2; --mu:#9aa3ad; --faint:#687079;
+  --accent:#3ddc84; --on-accent:#07140c; --accent-weak:#123224;
+  --warn:#f0c04a; --warn-weak:#352c12; --warn-line:#5c4a1c;
+  --danger:#ff7a6b;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:17px/1.65 var(--f);-webkit-font-smoothing:antialiased}
+img{max-width:100%}
+[hidden]{display:none!important}
+.wrap{max-width:600px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));padding-block:0}
+h1,h2,h3{line-height:1.3;margin:0;text-wrap:balance;letter-spacing:-.01em}
+
+/* 상단 바 + 진행바 */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.topbar .in{max-width:600px;margin:0 auto;padding:11px max(18px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:12px}
+.topbar .tt{font-weight:800;font-size:15px}
+.topbar .sp{margin-left:auto}
+.prog{font-size:13px;color:var(--mu);font-weight:600;white-space:nowrap}
+.tbtn{background:var(--surface2);border:1px solid var(--line);color:var(--mu);border-radius:9px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.bar{height:3px;background:var(--surface2)}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s ease}
+
+/* 히어로 */
+.hero{padding-block:36px 22px}
+.ey{display:inline-block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:14px}
+.hero h1{font-size:30px;font-weight:800}
+.hero .who{margin:16px 0 0;font-size:16px;color:var(--fg)}
+.hero .desc{margin:10px 0 0;font-size:16px;color:var(--mu)}
+.open{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 12px 12px 18px}
+.open .u{font-family:var(--f-mono);font-size:13.5px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.open a{flex:none;background:var(--accent);color:var(--on-accent);text-decoration:none;border-radius:11px;padding:11px 20px;font-weight:800;font-size:15px}
+
+/* 안내 카드 / 공통 카드 */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+section{margin-top:26px}
+.lead{font-size:16px;font-weight:800;margin:0 0 10px;display:flex;align-items:center;gap:9px}
+.lead .d{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
+.plain{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+.plain li{display:grid;grid-template-columns:22px 1fr;gap:10px;font-size:15.5px;color:var(--mu)}
+.plain li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--faint);margin:9px 0 0 7px}
+.plain b{color:var(--fg);font-weight:700}
+
+/* 사양 표 */
+.spec{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.spec li{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:14px 18px;font-size:15.5px}
+.spec li + li{border-top:1px solid var(--line)}
+.spec b{color:var(--mu);font-weight:700}
+.spec span{min-width:0}
+
+/* 안내 박스 */
+.note{display:flex;gap:11px;align-items:flex-start;border-radius:13px;padding:15px 17px;font-size:15px;line-height:1.55}
+.note .ic{flex:none;font-size:16px;font-weight:800}
+.note.warn{background:var(--warn-weak);color:var(--fg);border:1px solid var(--warn-line)}
+.note.warn .ic{color:var(--warn)}
+.note.mut{background:var(--surface2);color:var(--mu);border:1px solid var(--line)}
+.note b{color:var(--fg)}
+.notes{display:grid;gap:10px;margin-top:14px}
+
+/* 파트 헤더 */
+.part{display:flex;align-items:center;gap:14px;margin:44px 0 6px}
+.part .num{flex:none;width:40px;height:40px;border-radius:12px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:800;font-size:19px}
+.part h2{font-size:22px;font-weight:800}
+.part .sub{color:var(--faint);font-size:14px;margin-top:3px}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--accent-weak);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);vertical-align:middle}
+.tag.pc{background:var(--surface2);color:var(--mu);border-color:var(--line)}
+
+/* 단계 */
+.step{display:grid;grid-template-columns:34px 1fr;gap:6px 14px;padding:20px 0}
+.step + .step{border-top:1px solid var(--line)}
+.step:first-child{padding-top:4px}
+.step .n{grid-row:1/99;width:34px;height:34px;border-radius:11px;background:var(--surface2);border:1px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--accent)}
+.step h3{font-size:17px;font-weight:800;align-self:center;min-height:34px;display:flex;align-items:center;gap:7px}
+.step .b{grid-column:2;font-size:15.5px;color:var(--mu)}
+.step .b p{margin:8px 0}
+.step .b ul{margin:8px 0;padding-left:20px}
+.step .b li{margin:7px 0}
+.step .b b{color:var(--fg);font-weight:700}
+.key{display:inline-block;font-weight:700;color:var(--fg);background:var(--surface2);border:1px solid var(--line);border-radius:7px;padding:2px 9px;font-size:14.5px;white-space:nowrap}
+
+.go{display:flex;align-items:center;gap:9px;margin:10px 0 4px;background:var(--surface2);border:1px solid var(--line);color:var(--fg);text-decoration:none;border-radius:12px;padding:13px 16px;font-size:15px;font-weight:700}
+.go .arr{margin-left:auto;color:var(--accent);font-weight:800}
+
+.copy{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 15px;margin:8px 0 2px;display:flex;align-items:center;gap:10px}
+.copy code{font-family:var(--f-mono);font-size:13px;color:var(--fg);word-break:break-all;min-width:0;flex:1}
+.copy button{flex:none;background:var(--accent);color:var(--on-accent);border:0;border-radius:9px;padding:10px 16px;font:inherit;font-size:13.5px;font-weight:800;cursor:pointer}
+.cf{font-size:13px;color:var(--warn);margin:2px 0 6px;font-weight:600}
+
+/* 탭 */
+.tabs{display:flex;gap:7px;margin-bottom:6px}
+.tab{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--mu);border-radius:11px;padding:11px 8px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.panel ol{margin:4px 0 0;padding-left:22px}
+.panel ol li{margin:9px 0;font-size:15.5px}
+.panel .cap{color:var(--faint);font-size:13.5px;margin:14px 0 0;line-height:1.55}
+.panel h4{margin:18px 0 2px;font-size:14.5px;color:var(--fg);font-weight:800}
+.panel h4:first-child{margin-top:4px}
+
+/* FAQ */
+details.faq{background:var(--surface);border:1px solid var(--line);border-radius:13px;margin-top:10px;overflow:hidden}
+details.faq summary{cursor:pointer;padding:16px 18px;font-weight:700;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::after{content:"+";color:var(--accent);font-size:21px;font-weight:800;flex:none;line-height:1}
+details.faq[open] summary::after{content:"\2013"}
+details.faq .ans{padding:0 18px 16px;font-size:15px;color:var(--mu);line-height:1.6}
+details.faq .ans b{color:var(--fg)}
+details.faq .ans ul{margin:10px 0 0;padding-left:20px}
+details.faq .ans li{margin:8px 0}
+
+/* 체크리스트 */
+.ck{display:flex;gap:13px;align-items:flex-start;padding:14px 0;font-size:15.5px;cursor:pointer;user-select:none}
+.ck + .ck{border-top:1px solid var(--line)}
+.ck input{appearance:none;-webkit-appearance:none;flex:none;width:24px;height:24px;border:2px solid var(--line);border-radius:7px;margin:0;cursor:pointer;position:relative;background:var(--surface)}
+.ck input:checked{background:var(--accent);border-color:var(--accent)}
+.ck input:checked::after{content:"\2713";position:absolute;inset:0;color:var(--on-accent);font-size:15px;font-weight:800;display:grid;place-items:center}
+.ck span{padding-top:1px;transition:color .15s}
+.ck input:checked + span{color:var(--faint);text-decoration:line-through}
+.optrow{margin-top:6px;padding-top:15px;border-top:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--accent);letter-spacing:.02em}
+
+footer{color:var(--faint);font-size:14px;line-height:1.7;margin:40px 0 52px;padding-top:22px;border-top:1px solid var(--line)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="in">
+    <span class="tt">학습 탐색기 설치</span>
+    <span class="sp"></span>
+    <span class="prog" id="prog">준비 0 / 5</span>
+    <button class="tbtn" id="theme" type="button">테마</button>
+  </div>
+  <div class="bar"><i id="fill"></i></div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="ey">유튜브 학습 영상 탐색기</span>
+    <h1>공부할 영상을<br>편하게 찾는 탐색기</h1>
+    <p class="who">안녕하세요, 3D 배성준 학생입니다. AI 수업을 듣고 챗봇을 활용해 만든 탐색기를 필요한 분들께 공유합니다.</p>
+    <p class="desc">공부 영상을 검색해 구독자수·조회수·조회수÷구독자수로 정렬해 볼 수 있어요. 3분 이하 영상과 제목에 제외 단어가 든 영상은 숨겨, 쇼츠와 홍보성 영상을 줄여 줍니다.</p>
+    <div class="open">
+      <span class="u">suronbeautiful-netizen.github.io/SS/</span>
+      <a href="https://suronbeautiful-netizen.github.io/SS/" target="_blank" rel="noopener">열기</a>
+    </div>
+  </header>
+
+  <section>
+    <div class="card">
+      <p class="lead"><span class="d"></span>이 안내를 카톡으로 받으셨다면</p>
+      <ul class="plain">
+        <li><b>키 발급은 컴퓨터가 편해요.</b> 이 안내 주소를 카톡 ‘나와의 채팅’에 보내 두고, 컴퓨터 카톡에서 열면 번갈아 보기 좋아요.</li>
+        <li><b>앱 사용과 홈 화면 추가는 크롬(아이폰은 사파리)에서 하세요.</b> 카톡 안에서 열린 화면은 메뉴가 달라 설치가 안 될 수 있어요.</li>
+      </ul>
+      <div class="copy"><code id="gurl">https://suronbeautiful-netizen.github.io/SS/guide.html</code><button type="button" data-copy="gurl">복사</button></div>
+      <div class="cf" hidden>자동 복사가 안 돼요. 위 주소를 길게 누르거나 드래그해서 복사해 주세요.</div>
+    </div>
+  </section>
+
+  <section>
+    <ul class="spec">
+      <li><b>이름</b><span>학습 탐색기</span></li>
+      <li><b>쓰는 곳</b><span>휴대폰 · 데스크톱 (크롬 권장)</span></li>
+      <li><b>정렬</b><span>구독자수 · 조회수 · 조회수÷구독자수</span></li>
+      <li><b>숨기는 영상</b><span>3분 이하 영상, 제목에 제외 단어(#광고·유료광고·#협찬 등)가 든 영상. 제외 단어는 앱 ⚙ 설정에서 바꿀 수 있어요.</span></li>
+      <li><b>필요한 것</b><span>본인의 무료 유튜브 API 키 (최초 1회)</span></li>
+      <li><b>검색 한도</b><span>프로젝트당 하루 100회. 같은 프로젝트의 키를 쓰는 폰·PC가 함께 사용해요.</span></li>
+    </ul>
+    <div class="notes">
+      <div class="note mut"><span class="ic">↕</span><span>정렬은 한 번 검색으로 가져온 목록 안에서만 적용돼요. 정렬을 바꿔도 검색 횟수는 늘지 않아요.</span></div>
+      <div class="note mut"><span class="ic">▶</span><span>영상 <b>재생 중 광고</b>를 없애 주는 앱은 아니에요.</span></div>
+    </div>
+  </section>
+
+  <!-- PART 1 -->
+  <div class="part">
+    <span class="num">1</span>
+    <div>
+      <h2>API 키 발급받기 <span class="tag pc">💻 컴퓨터</span></h2>
+      <div class="sub">약 5~10분 (익숙하지 않으면 더 걸릴 수 있어요) · 최초 한 번만</div>
+    </div>
+  </div>
+
+  <div class="note warn" style="margin-top:14px">
+    <span class="ic">!</span>
+    <span>카드 등록이나 <b>‘무료 체험 시작’</b>은 필요하지 않아요. <b>결제 안내가 나오면 진행하지 말고</b> 그냥 두세요.</span>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+
+    <div class="step">
+      <span class="n">1</span>
+      <h3>프로젝트 만들기</h3>
+      <div class="b">
+        <a class="go" href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">프로젝트 만들기 페이지 열기 <span class="arr">↗</span></a>
+        <ul>
+          <li>구글 로그인 후, 약관 창이 나오면 동의하고 계속</li>
+          <li>프로젝트 이름: <b>탐색기</b></li>
+          <li>조직 선택이 나오면 <b>조직 없음</b></li>
+          <li><span class="key">만들기</span> 클릭</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">2</span>
+      <h3>유튜브 API 켜기</h3>
+      <div class="b">
+        <a class="go" href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">API 라이브러리 페이지 열기 <span class="arr">↗</span></a>
+        <ul>
+          <li>위쪽에 방금 만든 <b>탐색기</b> 프로젝트가 선택됐는지 확인</li>
+          <li>파란 <span class="key">사용</span> 버튼 클릭</li>
+          <li>이미 <span class="key">관리</span>로 보이면 켜진 상태 — 다음으로</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">3</span>
+      <h3>키 만들기</h3>
+      <div class="b">
+        <a class="go" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">사용자 인증 정보 페이지 열기 <span class="arr">↗</span></a>
+        <ul>
+          <li><span class="key">+ 사용자 인증 정보 만들기</span> → <span class="key">API 키</span></li>
+          <li>‘OAuth 클라이언트’·‘서비스 계정’은 <b>고르지 않아요</b></li>
+          <li>영문·숫자로 된 긴 코드(<b>AIza…</b>)가 나오면 완료</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">4</span>
+      <h3>사용 범위 제한하기</h3>
+      <div class="b">
+        <p>키를 쓸 수 있는 <b>웹사이트와 API를 제한</b>해, 키가 잘못 쓰일 가능성을 줄이는 설정이에요. 키 만든 화면에서 바로 하거나, 만든 키 이름을 눌러 들어가요.</p>
+        <p><b>① 애플리케이션 제한</b> → <span class="key">웹사이트</span> → 아래 <b>두 주소를 각각</b> 추가</p>
+        <div class="copy"><code id="r1">https://suronbeautiful-netizen.github.io</code><button type="button" data-copy="r1">복사</button></div>
+        <div class="cf" hidden>자동 복사가 안 돼요. 위 주소를 길게 누르거나 드래그해서 복사해 주세요.</div>
+        <div class="copy"><code id="r2">https://suronbeautiful-netizen.github.io/*</code><button type="button" data-copy="r2">복사</button></div>
+        <div class="cf" hidden>자동 복사가 안 돼요. 위 주소를 길게 누르거나 드래그해서 복사해 주세요.</div>
+        <p><b>② API 제한</b> → <span class="key">키 제한</span> → 목록에서 <b>YouTube Data API v3만</b> 체크</p>
+        <p><span class="key">저장</span> 클릭 (반영까지 몇 분 걸릴 수 있어요)</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">5</span>
+      <h3>키 복사해 두기</h3>
+      <div class="b">
+        <p>키 글자(<b>AIza…</b>)를 <span class="key">복사</span>한 뒤 <b>카카오톡 ‘나와의 채팅’</b>에 붙여넣어 두세요. 폰에서 쓸 때 꺼내 씁니다.</p>
+        <p>키는 <b>단체방·공개 게시판에 올리지 마세요.</b></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">6</span>
+      <h3>탐색기에 키 넣기</h3>
+      <div class="b">
+        <a class="go" href="https://suronbeautiful-netizen.github.io/SS/" target="_blank" rel="noopener">학습 탐색기 열기 <span class="arr">↗</span></a>
+        <ul>
+          <li>키가 없으면 설정창이 자동으로 열려요 (오른쪽 위 <span class="key">⚙</span>로도 열려요)</li>
+          <li><b>API 키 입력칸</b>에 키 붙여넣기 → <span class="key">완료</span></li>
+          <li>검색어를 넣고 <span class="key">검색</span>, 영상이 나오면 성공!</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="notes">
+    <div class="note mut"><span class="ic">i</span><span>키는 <b>기기·브라우저마다 따로</b> 저장돼요. 폰과 컴퓨터에서 모두 쓰려면 각각 한 번씩 넣어 주세요.</span></div>
+  </div>
+
+  <!-- PART 2 -->
+  <div class="part">
+    <span class="num">2</span>
+    <div>
+      <h2>홈 화면에 추가 <span class="tag">선택</span></h2>
+      <div class="sub">안 해도 주소로 열어서 쓸 수 있어요</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="tabs" role="tablist">
+      <button class="tab" type="button" role="tab" data-panel="and" aria-selected="true">📱 안드로이드</button>
+      <button class="tab" type="button" role="tab" data-panel="ios" aria-selected="false">📱 아이폰</button>
+      <button class="tab" type="button" role="tab" data-panel="pc" aria-selected="false">💻 컴퓨터</button>
+    </div>
+
+    <div class="panel" id="and" role="tabpanel">
+      <ol>
+        <li><b>크롬</b> 앱으로 탐색기 주소 열기</li>
+        <li>오른쪽 위 <span class="key">⋮</span> → <span class="key">앱 설치</span> 또는 <span class="key">홈 화면에 추가</span></li>
+        <li>안내에 따라 추가</li>
+      </ol>
+      <p class="cap">삼성 인터넷은 메뉴(≡) → [현재 페이지 추가] → [홈 화면]. 이 방법은 직접 확인하지 못했고, 기기마다 메뉴 위치가 다를 수 있어요.</p>
+    </div>
+
+    <div class="panel" id="ios" role="tabpanel" hidden>
+      <ol>
+        <li><b>사파리</b>로 탐색기 주소 열기</li>
+        <li>아래 <span class="key">공유</span> 버튼 → <span class="key">홈 화면에 추가</span> → <span class="key">추가</span></li>
+      </ol>
+      <p class="cap">아이폰은 직접 확인하지 못했어요. 설치·재생이 조금 다를 수 있습니다.</p>
+    </div>
+
+    <div class="panel" id="pc" role="tabpanel" hidden>
+      <h4>방법 1. 앱처럼 설치 (크롬·엣지)</h4>
+      <ol>
+        <li>탐색기 주소 열기</li>
+        <li>주소창 오른쪽 끝 <b>설치 아이콘(모니터 모양)</b> → <span class="key">설치</span></li>
+        <li>아이콘이 안 보이면 ⋮ 메뉴에서 ‘설치’·‘앱’이 든 항목을 찾고, 그래도 없으면 아래 <b>방법 2</b>를 이용하세요</li>
+      </ol>
+      <h4>방법 2. 바탕화면 바로가기 (윈도우, 가장 확실)</h4>
+      <ol>
+        <li>바탕화면 빈 곳 마우스 오른쪽 클릭</li>
+        <li><span class="key">새로 만들기</span> → <span class="key">바로 가기</span></li>
+        <li>항목 위치에 아래 주소 붙여넣기 → <span class="key">다음</span></li>
+        <li>이름에 ‘학습 탐색기’ → <span class="key">마침</span></li>
+      </ol>
+      <div class="copy"><code id="ap">https://suronbeautiful-netizen.github.io/SS/</code><button type="button" data-copy="ap">복사</button></div>
+      <div class="cf" hidden>자동 복사가 안 돼요. 위 주소를 길게 누르거나 드래그해서 복사해 주세요.</div>
+    </div>
+    <p class="cap">설치한 뒤 키 입력칸이 다시 나오면 키를 한 번 더 넣어 주세요.</p>
+  </div>
+
+  <section>
+    <h2 style="font-size:19px;font-weight:800;margin-bottom:12px">자주 묻는 질문</h2>
+    <details class="faq">
+      <summary>검색이 안 되고 오류가 떠요</summary>
+      <div class="ans">화면 위쪽에 나오는 안내 문구를 먼저 보세요.
+        <ul>
+          <li><b>“API 키가 올바르지 않습니다”</b> → ⚙ 설정에서 키를 다시 붙여넣기</li>
+          <li><b>“이 주소에서 키 사용이 막혔습니다”</b> → 4단계의 웹사이트 주소 두 개 확인. 저장 후 몇 분 기다려야 할 수도 있어요.</li>
+          <li><b>“YouTube Data API v3가 꺼져 있습니다”</b> → 2단계에서 <b>사용</b>을 눌렀는지 확인</li>
+          <li><b>“오늘 할당량을 다 썼습니다”</b> → 하루 한도를 다 쓴 거예요. 한국 시간 오후 4시 또는 5시(계절에 따라 달라요)에 초기화돼요.</li>
+        </ul>
+      </div>
+    </details>
+    <details class="faq">
+      <summary>검색 한도는 어떻게 세나요?</summary>
+      <div class="ans">같은 프로젝트의 키를 쓰는 기기는 <b>하루 100회를 함께</b> 써요. 앱 화면의 ‘오늘 요청한 검색’ 숫자는 그 브라우저에서 센 값이라, 다른 기기에서 쓴 만큼은 빠져 있어요. 정렬 변경에는 횟수가 추가되지 않아요. 같은 검색어도 <b>저장된 결과를 다시 보는 동안(약 30분·최대 8개)</b>에는 추가되지 않지만, 저장 시간이 지나거나 결과가 밀려나면 다시 차감돼요.</div>
+    </details>
+    <details class="faq">
+      <summary>왜 어떤 짧은 영상은 안 보이나요?</summary>
+      <div class="ans">쇼츠를 거르는 기준이 3분 이하라서 <b>3분 이하의 일반 영상도 함께 빠져요.</b> 공부용으로는 괜찮다고 보고 둔 설정이에요.</div>
+    </details>
+    <details class="faq">
+      <summary>정말 공짜인가요?</summary>
+      <div class="ans">카드 등록 없이 키를 만들 수 있고, 기본 한도 안에서는 요금이 붙지 않아요. 결제 계정을 연결하지 않았다면 한도를 넘겨도 요금이 아니라 그날 검색이 막힐 뿐이에요.</div>
+    </details>
+  </section>
+
+  <section>
+    <div class="card">
+      <p class="lead"><span class="d"></span>설정 체크리스트</p>
+      <label class="ck"><input type="checkbox"><span>프로젝트 만들고 YouTube Data API v3 켜기</span></label>
+      <label class="ck"><input type="checkbox"><span>API 키 발급</span></label>
+      <label class="ck"><input type="checkbox"><span>사용 범위 제한 (웹사이트 주소 2개 · API 제한)</span></label>
+      <label class="ck"><input type="checkbox"><span>탐색기 ⚙ 설정에 키 넣고 검색 확인</span></label>
+      <div class="optrow">✓ 여기까지 하면 바로 쓸 수 있어요 · 아래는 선택</div>
+      <label class="ck"><input type="checkbox" data-opt><span>홈 화면에 추가</span></label>
+    </div>
+  </section>
+
+  <footer>
+    처음 만든 학습용 도구라 부족한 점이 있을 수 있어요. 써 보시고 의견 주시면 개선에 참고하겠습니다.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement, tb=document.getElementById("theme");
+  function cur(){var a=root.getAttribute("data-theme");if(a)return a;return matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}
+  tb.addEventListener("click",function(){root.setAttribute("data-theme",cur()==="dark"?"light":"dark");});
+
+  var tabs=[].slice.call(document.querySelectorAll(".tab"));
+  tabs.forEach(function(t){t.addEventListener("click",function(){
+    tabs.forEach(function(x){x.setAttribute("aria-selected", x===t?"true":"false");
+      document.getElementById(x.dataset.panel).hidden = x!==t;});
+  });});
+
+  [].slice.call(document.querySelectorAll("[data-copy]")).forEach(function(b){
+    b.addEventListener("click",function(){
+      var el=document.getElementById(b.dataset.copy), txt=el.textContent.trim();
+      var fail=b.parentNode.nextElementSibling;
+      function ok(){
+        if(fail&&fail.classList.contains("cf"))fail.hidden=true;
+        var o=b.textContent;b.textContent="복사됨";
+        setTimeout(function(){b.textContent=o;},1400);
+      }
+      function bad(){
+        var done=false;
+        try{var r=document.createRange();r.selectNodeContents(el);
+          var s=getSelection();s.removeAllRanges();s.addRange(r);
+          done=document.execCommand("copy");}catch(e){}
+        if(done){ok();return;}
+        if(fail&&fail.classList.contains("cf"))fail.hidden=false;
+      }
+      try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,bad);}else{bad();}}catch(e){bad();}
+    });
+  });
+
+  var boxes=[].slice.call(document.querySelectorAll(".ck input"));
+  var req=boxes.filter(function(b){return !b.hasAttribute("data-opt");});
+  var fill=document.getElementById("fill"), prog=document.getElementById("prog");
+  function sync(){
+    var n=req.filter(function(b){return b.checked;}).length;
+    if(fill)fill.style.width=(req.length?Math.round(n/req.length*100):0)+"%";
+    if(prog)prog.textContent="준비 "+n+" / "+req.length;
+  }
+  try{var saved=JSON.parse(localStorage.getItem("yx-guide-ck")||"[]");
+    boxes.forEach(function(b,i){b.checked=!!saved[i];});}catch(e){}
+  boxes.forEach(function(b){b.addEventListener("change",function(){
+    try{localStorage.setItem("yx-guide-ck",JSON.stringify(boxes.map(function(x){return x.checked;})));}catch(e){}
+    sync();
+  });});
+  sync();
+})();
+</script>
+</body>
+</html>
