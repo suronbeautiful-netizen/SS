@@ -56,14 +56,18 @@ body:has(#md[open]){overflow:hidden}
 .ft{grid-column:2;grid-row:2;overflow:auto}
 #mtl{font-size:13px}
 }
-#md.z .bh{position:fixed;top:8px;left:8px;right:8px;z-index:3;padding:0;flex-direction:row;justify-content:space-between;pointer-events:none}
+#md.z .bh{position:fixed;top:8px;left:8px;right:8px;z-index:3;padding:0;flex-direction:row;justify-content:flex-start;pointer-events:none;transition:opacity .3s}
 #md.z .bh button{pointer-events:auto;background:rgba(0,0,0,.55);color:#fff;border-color:#666}
 #md.z .ft{display:none}
 #md.z #pl{position:fixed;inset:0;z-index:1;width:auto;height:auto;aspect-ratio:auto;margin:0}
 #md.z #pl iframe{position:absolute;left:50%;top:50%;width:min(100vw,177.78vh);width:min(100vw,177.78dvh);height:min(100vh,56.25vw);height:min(100dvh,56.25vw);transform:translate(-50%,-50%)}
 #md.z.c #pl iframe{width:max(100vw,177.78vh);width:max(100vw,177.78dvh);height:max(100vh,56.25vw);height:max(100dvh,56.25vw)}
 #cv{display:none}
-#md.z #cv{display:inline-block}
+#md.z #cv{display:inline-block;position:absolute;left:50%;top:0;transform:translateX(-50%)}
+#md.z .bh button{transition:opacity .3s}
+#md.z.h .bh button:not(#mo){opacity:0;pointer-events:none}
+#mo{display:none}
+#md.z.h #mo{display:flex;align-items:center;justify-content:center;position:absolute;left:50%;top:0;transform:translateX(-50%);width:64px;height:44px;padding:0;font-size:20px;line-height:1;background:rgba(0,0,0,.28);border-color:transparent;color:rgba(255,255,255,.75);pointer-events:auto}
 @media(orientation:portrait) and (pointer:coarse){
 #md.z #pl{inset:auto;top:0;left:0;width:100vh;width:100dvh;height:100vw;transform-origin:0 0;transform:translateX(100vw) rotate(90deg)}
 #md.z #pl iframe{width:min(100vh,177.78vw);width:min(100dvh,177.78vw);height:min(100vw,56.25vh);height:min(100vw,56.25dvh)}
@@ -90,7 +94,7 @@ body:has(#md[open]){overflow:hidden}
 <div id="list"></div>
 </main>
 <dialog id="md" aria-labelledby="mtl"><div class="bx">
-<div class="bh"><button type="button" id="x">✕ 닫기</button><button type="button" id="cv">확대</button><button type="button" id="zm">⤢ 전체화면</button></div>
+<div class="bh"><button type="button" id="x">✕ 닫기</button><button type="button" id="cv">확대</button><button type="button" id="mo" aria-label="버튼 표시">⋯</button><button type="button" id="zm">⤢ 전체화면</button></div>
 <div id="pl"></div>
 <div class="ft"><div id="mtl"></div><a id="yt" target="_blank" rel="noopener noreferrer"></a></div>
 </div></dialog>
@@ -187,20 +191,25 @@ load:b=>{if(b){rows=undefined;render();msg("검색 중…","ld")}else if($("#msg
 done:d=>{rows=d;lq=pq;msg("");render();updC()},
 fail:m=>{msg(m);updC()}};
 const F=u=>fetch(u),run=mkRun(F,ui,{cache,count});
+let ht=0,api=false,playing=false,pt=0,ytq=null;
+const sh=()=>{const m=$("#md");m.classList.remove("h");clearTimeout(ht);if(api&&playing&&m.classList.contains("z"))ht=setTimeout(()=>m.classList.add("h"),3500)};
+const ytLoad=cb=>{if(window.YT&&YT.Player){cb();return}ytq=cb;if(document.getElementById("yta"))return;window.onYouTubeIframeAPIReady=()=>{const c=ytq;ytq=null;c&&c()};const s=document.createElement("script");s.id="yta";s.src="https://www.youtube.com/iframe_api";s.onerror=()=>{ytq=null;s.remove()};document.head.append(s)};
+const watch=f=>{const k=++pt;api=false;playing=false;ytLoad(()=>{if(k!==pt)return;try{new YT.Player(f,{events:{onReady:e=>{if(k!==pt)return;api=true;try{playing=e.target.getPlayerState()===1}catch(x){}sh()},onStateChange:e=>{if(k!==pt)return;const s=e.data;if(s===3)return;playing=s===1;sh()},onError:()=>{if(k===pt){playing=false;sh()}}}})}catch(x){}})};
 const lk=()=>{try{const o=screen.orientation;if(o&&o.lock)o.lock("landscape").then(()=>{if(!$("#md").classList.contains("z"))ul()},()=>{})}catch(e){}};
 const ul=()=>{try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}};
 const ef=()=>{try{if(document.fullscreenElement){const p=document.exitFullscreen();p&&p.catch&&p.catch(()=>{})}}catch(e){}};
-const rz=()=>{$("#md").classList.remove("z","c");$("#zm").textContent="⤢ 전체화면";$("#cv").textContent="확대";ul()};
+const rz=()=>{clearTimeout(ht);$("#md").classList.remove("z","c","h");$("#zm").textContent="⤢ 전체화면";$("#cv").textContent="확대";ul()};
 const zm=()=>{const m=$("#md");if(m.classList.contains("z")){rz();ef();return}
-m.classList.add("z");$("#zm").textContent="⤡ 줄이기";
+m.classList.add("z");$("#zm").textContent="⤡ 줄이기";sh();
 try{const p=m.requestFullscreen&&m.requestFullscreen();if(p&&p.then)p.then(()=>{if(!m.classList.contains("z")){ef();return}if(document.fullscreenElement===m)lk()},()=>{})}catch(e){}};
-const cv=()=>{const c=$("#md").classList.toggle("c");$("#cv").textContent=c?"확대 해제":"확대"};
+const cv=()=>{const c=$("#md").classList.toggle("c");$("#cv").textContent=c?"확대 해제":"확대";sh()};
 const play=r=>{const v=r.v,e=!(v.status&&v.status.embeddable===false),pl=$("#pl"),t=(v.snippet||{}).title||"";
 rz();pl.textContent="";
-if(e){const f=mk("iframe");f.src="https://www.youtube.com/embed/"+encodeURIComponent(v.id)+"?rel=0&playsinline=1&autoplay=1";f.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";f.allowFullscreen=true;f.referrerPolicy="strict-origin-when-cross-origin";f.title=t;pl.append(f)}
+if(e){const f=mk("iframe");f.src="https://www.youtube.com/embed/"+encodeURIComponent(v.id)+"?rel=0&playsinline=1&autoplay=1&fs=0&enablejsapi=1"+(/^https?:$/.test(location.protocol)?"&origin="+encodeURIComponent(location.origin):"");f.allow="autoplay; encrypted-media; picture-in-picture";f.referrerPolicy="strict-origin-when-cross-origin";f.title=t;pl.append(f)}
 else pl.append(mk("p",0,"이 영상은 임베드가 막혀 있습니다."));
-$("#mtl").textContent=t;const a=$("#yt");a.href="https://www.youtube.com/watch?v="+encodeURIComponent(v.id);a.textContent=e?"YouTube에서 열기":"YouTube에서 재생";const m=$("#md");if(m.showModal)m.showModal();else m.setAttribute("open","")};
-const shut=()=>{rz();ef();$("#pl").textContent="";const m=$("#md");if(m.close)m.close();else m.removeAttribute("open")};
+$("#mtl").textContent=t;const a=$("#yt");a.href="https://www.youtube.com/watch?v="+encodeURIComponent(v.id);a.textContent=e?"YouTube에서 열기":"YouTube에서 재생";const m=$("#md");if(m.showModal)m.showModal();else m.setAttribute("open","");
+if(e)watch($("#pl iframe"));else{pt++;api=false;playing=false}};
+const shut=()=>{pt++;api=false;playing=false;rz();ef();$("#pl").textContent="";const m=$("#md");if(m.close)m.close();else m.removeAttribute("open")};
 const gear=()=>{const s=$("#set");if(s.hidden){$("#k").value=apiKey;$("#w").value=words.join("\n")}s.hidden=!s.hidden;if(!s.hidden&&!apiKey)$("#k").focus()};
 $("#f").onsubmit=e=>{e.preventDefault();if(!apiKey)gear_open();pq=$("#q").value.trim();run($("#q").value,apiKey,{onSearch:updC});$("#q").blur()};
 const gear_open=()=>{if($("#set").hidden)gear()};
@@ -214,8 +223,11 @@ document.querySelectorAll("#sorts button").forEach(b=>b.onclick=()=>{sort=nextSo
 $("#x").onclick=shut;
 $("#zm").onclick=zm;
 $("#cv").onclick=cv;
+$("#mo").onclick=sh;
+$(".bh").addEventListener("focusin",sh);
+$("#md").addEventListener("keydown",sh);
 $("#md").onclick=e=>{if(e.target===e.currentTarget)shut()};
-$("#md").onclose=()=>{$("#pl").textContent="";rz();ef()};
+$("#md").onclose=()=>{pt++;api=false;playing=false;$("#pl").textContent="";rz();ef()};
 document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement)rz()});
 setInterval(updC,6e4);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)updC()});
