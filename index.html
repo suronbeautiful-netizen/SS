@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>학습 탐색기</title>
 <link rel="icon" href="data:,">
@@ -10,7 +10,8 @@
 <style>
 :root{--bg:#000;--fg:#eee;--mu:#9a9a9a;--bd:#333;--cd:#1c1c1e;--ac:#6ea0ff;--er:#ff7a6b}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Noto Sans KR",sans-serif}
+html{background:var(--bg)}
+body{margin:0;padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left);background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Noto Sans KR",sans-serif}
 .w{max-width:1200px;margin:0 auto;padding:0 12px}
 header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:8px 0}
 form,#bar,#sorts{display:flex;gap:6px}
@@ -36,22 +37,27 @@ button.on{border-color:var(--ac);color:var(--ac)}
 .tt{font-weight:600;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
 .mt,.st,.nb{display:block;font-size:12.5px;margin-top:3px;word-break:break-word}
 .mt{color:var(--mu)}
+.rs{display:block;font-size:12px;margin-top:3px;color:var(--ac)}
+.card.hl{animation:hl 1.2s ease-out}
+@keyframes hl{0%{box-shadow:0 0 0 2px var(--ac);background:#26324a}100%{box-shadow:0 0 0 2px transparent;background:var(--cd)}}
+@media(prefers-reduced-motion:reduce){.card.hl{animation:none;box-shadow:0 0 0 2px var(--ac)}}
 .nb{color:var(--ac)}
 body:has(#md[open]){overflow:hidden}
 #md{border:0;margin:0;padding:0;width:100%;height:100%;max-width:100%;max-height:100%;background:#000;color:#fff}
 #md:not([open]){display:none}
 #md[open]{display:block}
 .bx{width:100%;height:100%;background:#000}
-.ob{position:absolute;bottom:10px;z-index:2;display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;color:#fff;background:rgba(0,0,0,.45);touch-action:manipulation}
+#md.x .bx{scale:.92;opacity:0;filter:brightness(.4);transition:scale .3s ease-in,opacity .3s ease-in,filter .3s ease-in}
+.ob{position:absolute;top:max(10px,env(safe-area-inset-top));z-index:2;display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;border-radius:12px;color:#fff;background:rgba(0,0,0,.45);touch-action:manipulation}
 .ob[hidden]{display:none}
 .ob svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .ob:focus-visible{outline:2px solid #fff;outline-offset:2px}
-#zm{right:10px}
+#zm{left:max(10px,env(safe-area-inset-left))}
 #zm{transition:opacity .2s}
 #md.z.d #zm{opacity:.5}
 #md.z.f #zm{opacity:0;transition:opacity var(--fd,1s) linear}
 #md.z.h #zm{opacity:0}
-#yt{right:64px}
+#yt{left:calc(max(10px,env(safe-area-inset-left)) + 54px)}
 #pl{background:#000;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 #pl iframe{width:100%;height:100%;border:0}
 #pl p{color:#fff;margin:0;padding:12px;text-align:center}
@@ -81,7 +87,7 @@ body:has(#md[open]){overflow:hidden}
 <div id="list"></div>
 </main>
 <dialog id="md" aria-label="영상 재생"><div class="bx">
-<div id="pl"><a id="yt" class="ob" target="_blank" rel="noopener noreferrer" aria-label="YouTube에서 열기" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a><button type="button" id="zm" class="ob" aria-label="목록으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10h-6V4M14 10l7-7M4 14h6v6M10 14l-7 7"/></svg></button></div>
+<div id="pl"><a id="yt" class="ob" target="_blank" rel="noopener noreferrer" aria-label="YouTube에서 열기" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a><button type="button" id="zm" class="ob" aria-label="목록으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button></div>
 </div></dialog>
 <script>
 const DEF_EX=["#shorts","#광고","유료광고","유료 광고","#협찬"];
@@ -159,7 +165,7 @@ t.append(mk("span","tt",sn.title||""),
 mk("span","mt",[sn.channelTitle,fmtDur(isoSec(v.contentDetails&&v.contentDetails.duration)),(sn.publishedAt||"").slice(0,10)].filter(Boolean).join(" · ")),
 mk("span","st","조회 "+fmtKo(KEYS.views(r))+" · 구독 "+fmtKo(KEYS.subs(r))+" · "+fmtRatio(KEYS.ratio(r))));
 if(v.status&&v.status.embeddable===false)t.append(mk("span","nb","↗ YouTube에서 재생"));
-b.append(im,t);b.onclick=()=>play(r);return b};
+b.append(im,t);b.dataset.v=v.id;rsb(b,v.id);b.onclick=()=>play(r);return b};
 const render=()=>{
 document.querySelectorAll("#sorts button").forEach(b=>{const k=b.dataset.k,on=!!sort&&sort.key===k;b.textContent=L[k]+(on?(sort.dir==="desc"?" ▼":" ▲"):"");b.classList.toggle("on",on)});
 const li=$("#list"),inf=$("#inf");li.textContent="";
@@ -174,37 +180,47 @@ const msg=(t,c)=>{const e=$("#msg");e.textContent=t;e.className=c||""};
 const ui={
 load:b=>{if(b){rows=undefined;render();msg("검색 중…","ld")}else if($("#msg").className==="ld")msg("");updC()},
 done:d=>{rows=d;lq=pq;msg("");render();updC()},
-fail:m=>{msg(m);updC()}};
+fail:m=>{rows=null;render();msg(m);updC()}};
 const F=u=>fetch(u),run=mkRun(F,ui,{cache,count});
-let ht=0,ht2=0,shutT=0,depth=0,pend=0,api=false,playing=false,pt=0,ytq=null,player=null;
+let ht=0,ht2=0,shutT=0,depth=0,pend=0,api=false,playing=false,pt=0,ytq=null,player=null,act=false,kr=false,kv="",er=false,lvg=0,lastId="";
 const sid=Date.now().toString(36)+Math.random().toString(36).slice(2);
 const hs=d=>({yx:d,yxs:sid});
 const hd=s=>s&&s.yxs===sid&&s.yx===1?1:0;
 try{history.replaceState(hs(0),"")}catch(e){}
-const dispose=()=>{pt++;api=false;playing=false;if(player){try{player.destroy()}catch(e){}player=null}};
+const dispose=()=>{pt++;api=false;playing=false;act=false;kr=false;kv="";er=false;if(player){try{player.destroy()}catch(e){}player=null}};
+const PK="yx:pos";
+const lp=()=>{try{const m=JSON.parse(gs(PK)||"{}");if(!m||typeof m!=="object")return{};const n=Date.now(),o={};for(const k in m){if(/^[\w-]{11}$/.test(k)&&Array.isArray(m[k])&&n-m[k][1]<2592e6)o[k]=m[k]}return o}catch(e){return{}}};
+const sp=()=>{if(!kv||!player||!api)return;try{const t=player.getCurrentTime(),d=player.getDuration(),m=lp(),n=Date.now();if(t>10&&(!(d>0)||t<d-10))m[kv]=[Math.floor(t),n];else delete m[kv];const o={};Object.keys(m).filter(k=>/^[\w-]{11}$/.test(k)&&Array.isArray(m[k])&&n-m[k][1]<2592e6).sort((a,b)=>m[b][1]-m[a][1]).slice(0,50).forEach(k=>o[k]=m[k]);ss(PK,JSON.stringify(o))}catch(e){}};
 const clr=()=>{$("#pl").querySelectorAll("iframe,p").forEach(n=>n.remove())};
+const rsb=(b,id)=>{const o=b.querySelector(".rs"),n=+(lp()[id]||[])[0];if(o)o.remove();if(n>0)b.querySelector(".tx").append(mk("span","rs","이어보기 "+fmtDur(Math.floor(n))))};
+const fin=()=>{const id=lastId;lastId="";if(!id)return;const b=[...document.querySelectorAll(".card")].find(c=>c.dataset.v===id);if(!b)return;rsb(b,id);b.classList.remove("hl");void b.offsetWidth;b.classList.add("hl");setTimeout(()=>b.classList.remove("hl"),1300)};
+const leave=cb=>{if(!isOpen()||lvg)return;lvg=1;park();if(matchMedia("(prefers-reduced-motion:reduce)").matches){lvg=0;cb();return}$("#md").classList.add("x");setTimeout(()=>{lvg=0;cb()},300)};
+const park=()=>{if(!act)return;act=false;if(player&&api&&kv&&!er){sp();try{player.pauseVideo();api=false;playing=false;kr=true;return}catch(e){}}dispose();clr()};
 const sh=lv=>{const c=$("#md").classList;c.remove("h","f");const dim=lv?lv==="d":c.contains("d");if(lv)c.toggle("d",dim);clearTimeout(ht);clearTimeout(ht2);if(api&&playing&&c.contains("z")){const hold=dim?1800:1000,fade=1000;$("#md").style.setProperty("--fd",fade+"ms");ht=setTimeout(()=>{c.add("f");ht2=setTimeout(()=>{c.remove("f");c.add("h")},fade)},hold)}};
 const tch=()=>{const c=$("#md").classList;if(!c.contains("z")||!api||!playing)return;sh("d")};
 const ytLoad=cb=>{if(window.YT&&YT.Player){cb();return}ytq=cb;if(document.getElementById("yta"))return;window.onYouTubeIframeAPIReady=()=>{const c=ytq;ytq=null;c&&c()};const s=document.createElement("script");s.id="yta";s.src="https://www.youtube.com/iframe_api";s.onerror=()=>{ytq=null;s.remove()};document.head.append(s)};
-const watch=f=>{const k=++pt;api=false;playing=false;ytLoad(()=>{if(k!==pt)return;try{player=new YT.Player(f,{events:{onReady:e=>{if(k!==pt)return;api=true;try{playing=e.target.getPlayerState()===1}catch(x){}sh(playing?undefined:"f")},onStateChange:e=>{if(k!==pt)return;const s=e.data;if(s===3)return;playing=s===1;sh(playing?undefined:"f")},onError:()=>{if(k===pt){playing=false;$("#yt").hidden=false;sh()}}}})}catch(x){}})};
+const watch=f=>{const k=++pt;api=false;playing=false;ytLoad(()=>{if(k!==pt)return;try{player=new YT.Player(f,{events:{onReady:e=>{if(k!==pt||!act)return;api=true;try{playing=e.target.getPlayerState()===1}catch(x){}sh(playing?undefined:"f")},onStateChange:e=>{if(k!==pt)return;const s=e.data;if(!act){if(s===1)try{player.pauseVideo()}catch(x){}return}if(s===3)return;playing=s===1;sh(playing?undefined:"f")},onError:()=>{if(k===pt&&act){er=true;playing=false;$("#yt").hidden=false;sh()}}}})}catch(x){}})};
 const lk=()=>{try{const o=screen.orientation;if(o&&o.lock)o.lock("landscape").then(()=>{if(!$("#md").classList.contains("z"))ul()},()=>{})}catch(e){}};
 const ul=()=>{try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}};
 const ef=()=>{try{if(document.fullscreenElement){const p=document.exitFullscreen();p&&p.catch&&p.catch(()=>{})}}catch(e){}};
-const rz=()=>{pend=0;clearTimeout(ht);clearTimeout(ht2);clearTimeout(shutT);$("#md").classList.remove("z","h","f","d");ul()};
+const rz=()=>{pend=0;lvg=0;clearTimeout(ht);clearTimeout(ht2);clearTimeout(shutT);$("#md").classList.remove("z","h","f","d","x");ul()};
 const fsr=()=>{const m=$("#md"),t=$("#md .bx");try{const p=t.requestFullscreen&&t.requestFullscreen();if(p&&p.then)p.then(()=>{if(!m.classList.contains("z")){ef();return}if(document.fullscreenElement===t)lk()},()=>{})}catch(e){}};
-const play=r=>{const v=r.v,e=!(v.status&&v.status.embeddable===false),pl=$("#pl"),t=(v.snippet||{}).title||"";
-rz();dispose();clr();
-if(e){const f=mk("iframe");f.src="https://www.youtube.com/embed/"+encodeURIComponent(v.id)+"?rel=0&playsinline=1&autoplay=1&fs=0&enablejsapi=1"+(/^https?:$/.test(location.protocol)?"&origin="+encodeURIComponent(location.origin):"");f.allow="autoplay; encrypted-media; picture-in-picture";f.referrerPolicy="strict-origin-when-cross-origin";f.title=t;pl.append(f)}
-else pl.append(mk("p",0,"이 영상은 임베드가 막혀 있습니다. 오른쪽 아래 ↗ 버튼으로 YouTube에서 여세요."));
+const play=r=>{lastId=r.v.id;const v=r.v,e=!(v.status&&v.status.embeddable===false),pl=$("#pl"),t=(v.snippet||{}).title||"";
+const same=e&&kr&&kv===v.id&&player&&pl.querySelector("iframe");
+rz();
+if(same){kr=false;act=true;api=true;playing=false}
+else{dispose();clr();act=true;const s0=+(lp()[v.id]||[])[0];
+if(e){kv=v.id;const f=mk("iframe");f.src="https://www.youtube.com/embed/"+encodeURIComponent(v.id)+"?rel=0&playsinline=1&autoplay=1&fs=0&enablejsapi=1"+(s0>0&&s0<1e5?"&start="+Math.floor(s0):"")+(/^https?:$/.test(location.protocol)?"&origin="+encodeURIComponent(location.origin):"");f.allow="autoplay; encrypted-media; picture-in-picture";f.referrerPolicy="strict-origin-when-cross-origin";f.title=t;pl.append(f)}
+else pl.append(mk("p",0,"이 영상은 임베드가 막혀 있습니다. 왼쪽 위 ↗ 버튼으로 YouTube에서 여세요."))}
 const a=$("#yt");a.hidden=e;a.href="https://www.youtube.com/watch?v="+encodeURIComponent(v.id);
 const m=$("#md");m.classList.add("z");if(m.showModal)m.showModal();else m.setAttribute("open","");
 if(depth<1){history.pushState(hs(1),"");depth=1}
-fsr();if(e){sh("f");watch($("#pl iframe"))}};
+fsr();if(same){try{player.playVideo()}catch(x){}sh("f")}else if(e){sh("f");watch($("#pl iframe"))}};
 const isOpen=()=>{const m=$("#md");return m.open||m.hasAttribute("open")};
-const closeModal=()=>{dispose();rz();ef();clr();const m=$("#md");if(isOpen()){if(m.close)m.close();else m.removeAttribute("open")}};
+const closeModal=()=>{park();rz();ef();const m=$("#md");if(isOpen()){if(m.close)m.close();else m.removeAttribute("open")}fin()};
 const shut=()=>{if(pend)return;clearTimeout(shutT);if(depth>0){pend=1;const k=pt;history.go(-depth);shutT=setTimeout(()=>{pend=0;if(k===pt&&isOpen()){depth=0;try{history.replaceState(hs(0),"")}catch(e){}closeModal()}},800)}else closeModal()};
 const gear=()=>{const s=$("#set");if(s.hidden){$("#k").value=apiKey;$("#w").value=words.join("\n")}s.hidden=!s.hidden;if(!s.hidden&&!apiKey)$("#k").focus()};
-$("#f").onsubmit=e=>{e.preventDefault();if(!apiKey)gear_open();pq=$("#q").value.trim();run($("#q").value,apiKey,{onSearch:updC});$("#q").blur()};
+$("#f").onsubmit=e=>{e.preventDefault();if(!apiKey){gear_open();return}pq=$("#q").value.trim();run($("#q").value,apiKey,{onSearch:updC});$("#q").blur()};
 const gear_open=()=>{if($("#set").hidden)gear()};
 $("#gr").onclick=gear;
 const apW=()=>{words=normWords($("#w").value.split("\n"));ss("yx:ex",JSON.stringify(words));render()};
@@ -216,15 +232,16 @@ document.querySelectorAll("#sorts button").forEach(b=>b.onclick=()=>{sort=nextSo
 let hid0=false;
 $("#zm").addEventListener("pointerdown",()=>{const c=$("#md").classList;hid0=c.contains("h")||c.contains("f")});
 $("#zm").addEventListener("pointercancel",()=>{hid0=false});
-$("#zm").onclick=()=>{const c=$("#md").classList,w=hid0||c.contains("h")||c.contains("f");hid0=false;if(w){sh("f");return}shut()};
+$("#zm").onclick=()=>{const c=$("#md").classList,w=hid0||c.contains("h")||c.contains("f");hid0=false;if(w){sh("f");return}leave(shut)};
 $("#zm").addEventListener("pointerenter",e=>{if(e.pointerType==="mouse")sh("f")});
 $("#zm").addEventListener("focusin",()=>sh("f"));
 $("#md").addEventListener("keydown",()=>sh("f"));
+$("#md").addEventListener("mousemove",()=>{if($("#md").classList.contains("z"))sh("f")});
 addEventListener("blur",()=>setTimeout(()=>{const f=$("#pl iframe");if(f&&document.activeElement===f){tch();try{window.focus()}catch(x){}}},0));
-$("#md").onclick=e=>{if(e.target===e.currentTarget)shut()};
-$("#md").onclose=()=>{dispose();clr();rz();ef();if(depth>0){const d=depth;depth=0;history.go(-d)}};
-document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&isOpen())shut()});
-addEventListener("popstate",e=>{pend=0;const d=hd(e.state);depth=d;if(!isOpen()){if(d>0)history.go(-d);return}if(d===0)closeModal()});
+$("#md").onclick=e=>{if(e.target===e.currentTarget)leave(shut)};
+$("#md").onclose=()=>{park();rz();ef();fin();if(depth>0){const d=depth;depth=0;history.go(-d)}};
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&isOpen())leave(shut)});
+addEventListener("popstate",e=>{const w=pend;pend=0;const d=hd(e.state);depth=d;if(!isOpen()){if(d>0)history.go(-d);return}if(d===0){if(w)closeModal();else leave(closeModal)}});
 setInterval(updC,6e4);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)updC()});
 addEventListener("focus",updC);addEventListener("pageshow",updC);
