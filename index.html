@@ -182,7 +182,7 @@ load:b=>{if(b){rows=undefined;render();msg("검색 중…","ld")}else if($("#msg
 done:d=>{rows=d;lq=pq;msg("");render();updC()},
 fail:m=>{rows=null;render();msg(m);updC()}};
 const F=u=>fetch(u),run=mkRun(F,ui,{cache,count});
-let ht=0,ht2=0,shutT=0,depth=0,pend=0,api=false,playing=false,pt=0,ytq=null,player=null,act=false,kr=false,kv="",er=false,lvg=0,lastId="";
+let ht=0,ht2=0,shutT=0,depth=0,pend=0,api=false,playing=false,pt=0,ytq=null,player=null,act=false,kr=false,kv="",er=false,lvg=0,lastId="",cing=0;
 const sid=Date.now().toString(36)+Math.random().toString(36).slice(2);
 const hs=d=>({yx:d,yxs:sid});
 const hd=s=>s&&s.yxs===sid&&s.yx===1?1:0;
@@ -207,7 +207,7 @@ const rz=()=>{pend=0;lvg=0;clearTimeout(ht);clearTimeout(ht2);clearTimeout(shutT
 const fsr=()=>{const m=$("#md"),t=$("#md .bx");try{const p=t.requestFullscreen&&t.requestFullscreen();if(p&&p.then)p.then(()=>{if(!m.classList.contains("z")){ef();return}if(document.fullscreenElement===t)lk()},()=>{})}catch(e){}};
 const play=r=>{lastId=r.v.id;const v=r.v,e=!(v.status&&v.status.embeddable===false),pl=$("#pl"),t=(v.snippet||{}).title||"";
 const same=e&&kr&&kv===v.id&&player&&pl.querySelector("iframe");
-rz();
+rz();cing=0;
 if(same){kr=false;act=true;api=true;playing=false}
 else{dispose();clr();act=true;const s0=+(lp()[v.id]||[])[0];
 if(e){kv=v.id;const f=mk("iframe");f.src="https://www.youtube.com/embed/"+encodeURIComponent(v.id)+"?rel=0&playsinline=1&autoplay=1&fs=0&enablejsapi=1"+(s0>0&&s0<1e5?"&start="+Math.floor(s0):"")+(/^https?:$/.test(location.protocol)?"&origin="+encodeURIComponent(location.origin):"");f.allow="autoplay; encrypted-media; picture-in-picture";f.referrerPolicy="strict-origin-when-cross-origin";f.title=t;pl.append(f)}
@@ -217,7 +217,7 @@ const m=$("#md");m.classList.add("z");if(m.showModal)m.showModal();else m.setAtt
 if(depth<1){history.pushState(hs(1),"");depth=1}
 fsr();if(same){try{player.playVideo()}catch(x){}sh("f")}else if(e){sh("f");watch($("#pl iframe"))}};
 const isOpen=()=>{const m=$("#md");return m.open||m.hasAttribute("open")};
-const closeModal=()=>{park();rz();ef();const m=$("#md");if(isOpen()){if(m.close)m.close();else m.removeAttribute("open")}fin()};
+const closeModal=()=>{cing=1;park();rz();ef();const m=$("#md");if(isOpen()){if(m.close)m.close();else m.removeAttribute("open")}fin()};
 const shut=()=>{if(pend)return;clearTimeout(shutT);if(depth>0){pend=1;const k=pt;history.go(-depth);shutT=setTimeout(()=>{pend=0;if(k===pt&&isOpen()){depth=0;try{history.replaceState(hs(0),"")}catch(e){}closeModal()}},800)}else closeModal()};
 const gear=()=>{const s=$("#set");if(s.hidden){$("#k").value=apiKey;$("#w").value=words.join("\n")}s.hidden=!s.hidden;if(!s.hidden&&!apiKey)$("#k").focus()};
 $("#f").onsubmit=e=>{e.preventDefault();if(!apiKey){gear_open();return}pq=$("#q").value.trim();run($("#q").value,apiKey,{onSearch:updC});$("#q").blur()};
@@ -240,7 +240,8 @@ $("#md").addEventListener("mousemove",()=>{if($("#md").classList.contains("z"))s
 addEventListener("blur",()=>setTimeout(()=>{const f=$("#pl iframe");if(f&&document.activeElement===f){tch();try{window.focus()}catch(x){}}},0));
 $("#md").onclick=e=>{if(e.target===e.currentTarget)leave(shut)};
 $("#md").onclose=()=>{park();rz();ef();fin();if(depth>0){const d=depth;depth=0;history.go(-d)}};
-document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&isOpen())leave(shut)});
+$("#md").addEventListener("cancel",e=>{if(cing||lvg)return;e.preventDefault();leave(shut)});
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&isOpen()&&!cing&&!lvg)leave(closeModal)});
 addEventListener("popstate",e=>{const w=pend;pend=0;const d=hd(e.state);depth=d;if(!isOpen()){if(d>0)history.go(-d);return}if(d===0){if(w)closeModal();else leave(closeModal)}});
 setInterval(updC,6e4);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)updC()});
