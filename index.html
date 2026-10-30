@@ -290,6 +290,7 @@ const setSeen=()=>ss("yx:idis","1");
 const repeat=!!gs("yx:iv");ss("yx:iv","1");
 let curSt="";
 let expanded=!(repeat||seen());
+let userOpen=false;
 
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;refreshInstall()});
 addEventListener("appinstalled",()=>{deferredPrompt=null;didInstall=true;expanded=true;refreshInstall()});
@@ -312,13 +313,13 @@ let installing=false;
 const doInstall=async()=>{if(installing)return;if(!deferredPrompt){refreshInstall();return}installing=true;const p=deferredPrompt;deferredPrompt=null;try{await p.prompt();await p.userChoice}catch(e){}installing=false;refreshInstall()};
 
 const mkBtn=(txt,fn,sub)=>{const b=mk("button",sub?"sub":null,txt);b.type="button";b.onclick=fn;return b};
-const contBtn=()=>mkBtn("브라우저에서 계속",()=>{setSeen();expanded=false;showMin();if(!apiKey)gear_open()},1);
+const contBtn=()=>mkBtn("브라우저에서 계속",()=>{setSeen();expanded=false;userOpen=false;showMin();if(!apiKey)gear_open()},1);
 const copyBtn=sub=>mkBtn("주소 복사",()=>{copyUrl()},sub);
 const setBand=(title,sub,btns,iosImg)=>{$("#ibt").textContent=title;$("#ibs").textContent=sub||"";$("#ibs").style.display=sub?"":"none";const r=$("#ibr");r.textContent="";btns.forEach(b=>r.append(b));$("#iu").hidden=true;$("#iok").hidden=true;$("#iosg").hidden=!iosImg;$("#ibm").classList.remove("on");$("#ib").classList.add("on")};
 const hideBand=()=>{$("#ib").classList.remove("on");$("#ibm").classList.remove("on")};
 const showMin=()=>{$("#ibm").textContent=(curSt==="ready"||curSt==="ready-pc")?"📲 앱 설치":"📲 이 앱 설치 안내 열기";$("#ib").classList.remove("on");$("#ibm").classList.add("on")};
 
-const refreshInstall=()=>{const st=instState();curSt=st;updSetInstall(st);if(st==="standalone"){hideBand();return}if(expanded)bandFor(st);else showMin()};
+const refreshInstall=()=>{const st=instState();curSt=st;updSetInstall(st);if(st==="standalone"){hideBand();return}if(expanded&&!(st==="manual"&&isDesktop&&!userOpen))bandFor(st);else showMin()};
 const bandFor=st=>{
 if(st==="kakao-and")setBand("설치하려면 Chrome에서 열어 주세요","카카오톡 안에서는 앱 설치가 안 돼요.",[mkBtn("Chrome에서 열기",openChrome),copyBtn(1),contBtn()]);
 else if(st==="kakao-ios")setBand("설치하려면 Safari에서 열어 주세요","주소를 복사해 Safari에 붙여넣고 여세요.",[copyBtn(),contBtn()]);
@@ -327,17 +328,18 @@ else if(st==="ready")setBand("홈 화면에 앱으로 추가","한 번 설치하
 else if(st==="ready-pc")setBand("컴퓨터에 앱 설치","설치하면 창으로 따로 열 수 있어요.",[mkBtn("앱 설치",doInstall),contBtn()]);
 else if(st==="installed-browser")setBand("설치를 마쳤다면 앱으로 여세요","홈 화면 아이콘으로 열고, 처음 한 번만 API 키를 넣으면 됩니다.",[mkBtn("확인",()=>{setSeen();expanded=false;showMin()})]);
 else if(st==="ios-safari")setBand("홈 화면에 추가해 앱처럼 쓰기","아래 그림처럼 하면 아이콘이 생겨요.",[contBtn()],true);
+else if(isDesktop)setBand("컴퓨터에 앱 설치 (선택)","앱 설치는 Chrome이나 Edge에서만 돼요. 다른 브라우저라면 [주소 복사]를 눌러 Chrome·Edge에 붙여넣으세요. 이미 Chrome·Edge라면 주소창 오른쪽 설치 아이콘이나 점 세 개 → ‘앱 설치’. 설치하지 않고 그대로 써도 괜찮아요.",[copyBtn(),contBtn()]);
 else setBand("앱으로 설치하기","브라우저 메뉴에서 설치할 수 있어요.",[mkBtn("설치 방법 보기",()=>{manualGuide()}),contBtn()]);
 };
 const manualGuide=()=>{setBand("설치 방법","Chrome: 우측 위 점 세 개 → '앱 설치' 또는 '홈 화면에 추가'. Edge: 점 세 개 → '앱 설치'.",[contBtn()])};
 
-$("#ibx").onclick=()=>{setSeen();expanded=false;showMin()};
-$("#ibm").onclick=()=>{if(curSt==="ready"||curSt==="ready-pc"){doInstall()}else{expanded=true;bandFor(curSt)}};
+$("#ibx").onclick=()=>{setSeen();expanded=false;userOpen=false;showMin()};
+$("#ibm").onclick=()=>{if(curSt==="ready"||curSt==="ready-pc"){doInstall()}else{expanded=true;userOpen=true;bandFor(curSt)}};
 
 const updSetInstall=st=>{const b=$("#si");if(st==="standalone"){$("#setinstall").style.display="none";return}$("#setinstall").style.display="";b.textContent=(st==="ready"||st==="ready-pc")?(st==="ready-pc"?"컴퓨터에 앱 설치":"이 앱 설치하기"):(isIOS?"홈 화면에 추가하는 법":"설치 방법 보기")};
 const copyInto=async(host,urlEl)=>{const u=location.href;let ok=false;try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(u);ok=true}}catch(e){}if(!ok){try{urlEl.focus();urlEl.select();ok=!!(document.execCommand&&document.execCommand("copy"))}catch(e){}}const f=host.querySelector(".iok");if(ok){f.textContent="복사됨";try{urlEl.blur()}catch(e){}}else{f.textContent="아래 주소를 길게 눌러 복사하세요";urlEl.focus();urlEl.select()}f.hidden=false};
 const copyBlock=host=>{const ui2=document.createElement("input");ui2.type="text";ui2.readOnly=true;ui2.value=location.href;ui2.style.cssText="width:100%;margin-top:6px;font-size:12px";ui2.onclick=()=>{ui2.select()};host.append(ui2);const fb=mk("div","iok");fb.hidden=true;const b=mkBtn("주소 복사",()=>{copyInto(host,ui2)});host.append(b);host.append(fb)};
-$("#si").onclick=()=>{const st=instState();const g=$("#sig");if(st==="ready"||st==="ready-pc"){doInstall();return}g.hidden=false;g.textContent="";if(isKakao||isInApp){g.append(mk("div",null,"먼저 Chrome 또는 Safari로 열어야 설치됩니다. 아래 주소를 복사해 기본 브라우저에 붙여넣으세요."));copyBlock(g)}else if(isIOS){g.append(mk("div",null,"아이폰: 공유 버튼 → '홈 화면에 추가' → 추가"));const sv=$("#iosg").querySelector("svg");if(sv)g.append(sv.cloneNode(true))}else{g.append(mk("div",null,"Chrome: 우측 위 점 세 개 → '앱 설치'. Edge: 점 세 개 → '앱 설치'."))}};
+$("#si").onclick=()=>{const st=instState();const g=$("#sig");if(st==="ready"||st==="ready-pc"){doInstall();return}g.hidden=false;g.textContent="";if(isKakao||isInApp){g.append(mk("div",null,"먼저 Chrome 또는 Safari로 열어야 설치됩니다. 아래 주소를 복사해 기본 브라우저에 붙여넣으세요."));copyBlock(g)}else if(isIOS){g.append(mk("div",null,"아이폰: 공유 버튼 → '홈 화면에 추가' → 추가"));const sv=$("#iosg").querySelector("svg");if(sv)g.append(sv.cloneNode(true))}else if(isDesktop){g.append(mk("div",null,"앱 설치는 Chrome이나 Edge에서만 돼요. 다른 브라우저라면 아래 주소를 복사해 Chrome·Edge에 붙여넣으세요. 이미 Chrome·Edge라면 주소창 오른쪽 설치 아이콘이나 점 세 개 → '앱 설치'. 설치하지 않고 그대로 써도 괜찮아요."));copyBlock(g)}else{g.append(mk("div",null,"Chrome: 우측 위 점 세 개 → '앱 설치'. Edge: 점 세 개 → '앱 설치'."))}};
 
 sweep();render();updC();refreshInstall();if(!apiKey&&isStandalone())gear();
 </script>
