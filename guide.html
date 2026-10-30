@@ -52,6 +52,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .prog{font-size:13px;color:var(--mu);font-weight:600;white-space:nowrap}
 .tbtn{background:var(--surface2);border:1px solid var(--line);color:var(--mu);border-radius:9px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .bar{height:3px;background:var(--surface2)}
+.bar.stp{height:4px}
 .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s ease}
 
 
@@ -104,6 +105,14 @@ section{margin-top:14px}
 
 
 /* FAQ */
+details.fold{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+details.fold>summary{cursor:pointer;padding:15px 16px;font-weight:800;font-size:17px;list-style:none;display:flex;align-items:center;gap:10px}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary small{font-size:13px;font-weight:600;color:var(--mu)}
+details.fold>summary::after{content:"+";margin-left:auto;color:var(--accent);font-size:22px;font-weight:800;flex:none;line-height:1}
+details.fold[open]>summary::after{content:"\2013"}
+details.fold>.fb{padding:0 14px 12px}
+details.fold>.fb>details.faq:first-child{margin-top:0}
 details.faq{background:var(--surface);border:1px solid var(--line);border-radius:13px;margin-top:8px;overflow:hidden}
 details.faq summary{cursor:pointer;padding:13px 16px;font-weight:700;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
 details.faq summary::-webkit-details-marker{display:none}
@@ -133,6 +142,7 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
 .chip{width:36px;height:36px;flex:none;border:1px solid var(--line);background:var(--surface);color:var(--mu);border-radius:9px;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
 .chip.cur{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .done{margin:10px 0 0!important;color:var(--accent);font-weight:700;font-size:14.5px}
+#viewtoggle{scroll-margin-top:72px}
 #steps{scroll-margin-top:70px}
 #steps .step{scroll-margin-top:70px}
 #steps.one .step{display:none}
@@ -141,7 +151,6 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
 #stepctl[hidden]{display:none}
 #stepctl button{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--fg);font:inherit;font-weight:700;font-size:15px;padding:13px 8px;border-radius:11px;cursor:pointer}
 #stepctl button:disabled{opacity:.38;cursor:default}
-#stepat{flex:none;color:var(--mu);font-size:13.5px;font-weight:800;min-width:46px;text-align:center}
 /* 처음 방문 때만 보이는 보기 방식 선택 카드 */
 #choose{margin:14px 0 0}
 .ch-q{margin:0;font-size:18px;font-weight:800;line-height:1.35}
@@ -329,7 +338,6 @@ html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl
 
   <div id="stepctl" hidden>
     <button type="button" id="prev">← 이전</button>
-    <span id="stepat"></span>
     <button type="button" id="next">다음 →</button>
   </div>
 
@@ -340,7 +348,9 @@ html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl
   <a class="go" href="./" style="margin-top:10px">← 탐색기 화면으로 돌아가기</a>
 
   <section id="faq">
-    <h2 style="font-size:19px;font-weight:800;margin-bottom:8px">자주 묻는 질문</h2>
+   <details class="fold" id="faqd" open>
+    <summary>자주 묻는 질문 <small>오류가 날 때</small></summary>
+    <div class="fb">
     <details class="faq">
       <summary>검색이 안 되고 오류가 떠요</summary>
       <div class="ans">화면 위쪽에 나오는 안내 문구를 먼저 보세요.
@@ -364,16 +374,20 @@ html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl
       <summary>정말 공짜인가요?</summary>
       <div class="ans">카드 등록 없이 키를 만들 수 있고, 기본 한도 안에서는 요금이 붙지 않아요. 결제 계정을 연결하지 않았다면 한도를 넘겨도 요금이 아니라 그날 검색이 막힐 뿐이에요.</div>
     </details>
+    </div>
+   </details>
   </section>
 
   <section id="cklist">
-    <div class="card">
-      <p class="lead"><span class="d"></span>설정 체크리스트</p>
+   <details class="fold" id="ckd" open>
+    <summary>설정 체크리스트 <small id="ckn">0 / 4</small></summary>
+    <div class="fb">
       <label class="ck"><input type="checkbox"><span>프로젝트 만들고 YouTube Data API v3 켜기</span></label>
       <label class="ck"><input type="checkbox"><span>API 키 발급</span></label>
       <label class="ck"><input type="checkbox"><span>사용 범위 제한 (웹사이트 주소 2개 · API 제한)</span></label>
       <label class="ck"><input type="checkbox"><span>탐색기 ⚙ 설정에 키 넣고 검색 확인</span></label>
     </div>
+   </details>
   </section>
 
   <footer>
@@ -414,9 +428,17 @@ html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl
 
   var boxes=[].slice.call(document.querySelectorAll(".ck input"));
   var req=boxes.filter(function(b){return !b.hasAttribute("data-opt");});
-  var fill=document.getElementById("fill"), prog=document.getElementById("prog");
+  var fill=document.getElementById("fill"), prog=document.getElementById("prog"), barEl=document.querySelector(".bar"), ckn=document.getElementById("ckn");
+  var stepTop=null; // 한 단계씩 모드일 때 {n,N}: 위쪽 바를 단계 표시로 사용
   function sync(){
     var n=req.filter(function(b){return b.checked;}).length;
+    if(ckn)ckn.textContent=n+" / "+req.length;
+    if(barEl)barEl.classList.toggle("stp",!!stepTop);
+    if(stepTop){
+      if(fill)fill.style.width=Math.round(stepTop.n/stepTop.N*1000)/10+"%";
+      if(prog)prog.textContent="단계 "+stepTop.n+" / "+stepTop.N;
+      return;
+    }
     if(fill)fill.style.width=(req.length?Math.round(n/req.length*100):0)+"%";
     if(prog)prog.textContent="체크 "+n+" / "+req.length;
   }
@@ -433,8 +455,9 @@ html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl
     var steps=[].slice.call(card.querySelectorAll(".step")), N=steps.length;
     var nav=document.getElementById("stepnav"), ctl=document.getElementById("stepctl");
     var vAll=document.getElementById("vAll"), vOne=document.getElementById("vOne");
-    var prevB=document.getElementById("prev"), nextB=document.getElementById("next"), atL=document.getElementById("stepat");
-    var mode="all", cur=0, chosen=false;
+    var prevB=document.getElementById("prev"), nextB=document.getElementById("next");
+    var mode="all", cur=0, chosen=false, lastMode=null;
+    var faqd=document.getElementById("faqd"), ckd=document.getElementById("ckd");
     var chooseEl=document.getElementById("choose"), tog=document.getElementById("viewtoggle");
     var cOne=document.getElementById("cOne"), cAll=document.getElementById("cAll"), ckSec=document.getElementById("cklist");
     try{chosen=localStorage.getItem("yx-guide-chose")==="1";}catch(e){}
@@ -444,22 +467,26 @@ html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl
       var h=s.querySelector("h3");if(h)c.setAttribute("aria-label",h.textContent);
       c.addEventListener("click",function(){go(i,true);});nav.appendChild(c);return c;
     });
+    function sm(u){return u&&!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?"smooth":"auto";}
+    function focusStep(i){try{var h=steps[i]&&steps[i].querySelector("h3");if(h){h.setAttribute("tabindex","-1");h.focus({preventScroll:true});}}catch(e){}}
     function save(){try{localStorage.setItem("yx-guide-mode",mode);localStorage.setItem("yx-guide-step",String(cur));}catch(e){}}
     function paintChips(){chips.forEach(function(c,i){c.classList.toggle("cur",i===cur);});}
     function paint(){
       root.classList.remove("first");
       chooseEl.hidden=chosen;tog.hidden=!chosen;card.hidden=!chosen;ckSec.hidden=!chosen;prog.hidden=!chosen;
-      if(!chosen){nav.style.display="none";ctl.hidden=true;return;}
+      if(!chosen){stepTop=null;sync();nav.style.display="none";ctl.hidden=true;return;}
+      if(mode!==lastMode){lastMode=mode;var o=mode==="all";if(faqd)faqd.open=o;if(ckd)ckd.open=o;}
+      stepTop=mode==="one"?{n:cur+1,N:N}:null;sync();
       vAll.setAttribute("aria-pressed",mode==="all");vOne.setAttribute("aria-pressed",mode==="one");
       nav.style.display=mode==="one"?"flex":"none";
-      if(mode==="one"){card.classList.add("one");ctl.hidden=false;prevB.disabled=cur<=0;nextB.textContent=cur>=N-1?"탐색기 열기 →":"다음 →";atL.textContent="단계 "+(cur+1)+" / "+N;}
+      if(mode==="one"){card.classList.add("one");ctl.hidden=false;prevB.disabled=cur<=0;nextB.textContent=cur>=N-1?"탐색기 열기 →":"다음 →"}
       else{card.classList.remove("one");ctl.hidden=true;}
       steps.forEach(function(s,i){s.classList.toggle("act",i===cur);});paintChips();
     }
-    function go(i,user){if(i<0||i>=N)return;cur=i;paint();save();requestAnimationFrame(function(){try{(mode==="one"?card:steps[i]).scrollIntoView({behavior:user?"smooth":"auto",block:"start"});}catch(e){}});}
+    function go(i,user){if(i<0||i>=N)return;cur=i;paint();save();requestAnimationFrame(function(){try{(mode==="one"?card:steps[i]).scrollIntoView({behavior:sm(user),block:"start"});}catch(e){}if(user)focusStep(i);});}
     vAll.addEventListener("click",function(){mode="all";paint();save();try{steps[cur].scrollIntoView({block:"start"});}catch(e){}});
-    vOne.addEventListener("click",function(){mode="one";paint();save();try{card.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}});
-    function choose(m){mode=m;cur=0;chosen=true;try{localStorage.setItem("yx-guide-chose","1");}catch(e){}paint();save();requestAnimationFrame(function(){try{card.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}});}
+    vOne.addEventListener("click",function(){mode="one";paint();save();try{tog.scrollIntoView({behavior:sm(true),block:"start"});}catch(e){}});
+    function choose(m){mode=m;cur=0;chosen=true;try{localStorage.setItem("yx-guide-chose","1");}catch(e){}paint();save();requestAnimationFrame(function(){try{tog.scrollIntoView({behavior:sm(true),block:"start"});}catch(e){}focusStep(cur);});}
     cOne.addEventListener("click",function(){choose("one");});
     cAll.addEventListener("click",function(){choose("all");});
     prevB.addEventListener("click",function(){go(cur-1,true);});
@@ -473,6 +500,19 @@ html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl
     }
     paint();
   }
+  function openFaq(){var d=document.getElementById("faqd");if(d)d.open=true;}
+  [].slice.call(document.querySelectorAll('a[href="#faq"]')).forEach(function(a){a.addEventListener("click",openFaq);});
+  if(location.hash==="#faq")openFaq();
+  window.__yxOk=1;
+})();
+</script>
+<script>
+/* 위 스크립트가 중간에 실패하면 숨겨 둔 안내를 다시 보여 준다 */
+(function(){if(window.__yxOk)return;
+  document.documentElement.classList.remove("first");
+  ["viewtoggle","choose","stepnav","stepctl"].forEach(function(id){var e=document.getElementById(id);if(e)e.hidden=true;});
+  ["steps","cklist","prog"].forEach(function(id){var e=document.getElementById(id);if(e)e.hidden=false;});
+  var se=document.getElementById("steps");if(se)se.classList.remove("one");
 })();
 </script>
 </body>
