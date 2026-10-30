@@ -172,6 +172,8 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
     <span>카드 등록이나 <b>‘무료 체험 시작’</b>은 필요하지 않아요. <b>결제 안내가 나오면 진행하지 말고</b> 그냥 두세요.</span>
   </div>
 
+  <a class="go" href="./" style="margin-top:10px">← 탐색기 화면으로 돌아가기</a>
+
   <div id="viewtoggle" role="group" aria-label="보기 방식">
     <button type="button" id="vAll" class="vt" aria-pressed="true">전체 안내 보기</button>
     <button type="button" id="vOne" class="vt" aria-pressed="false">한 단계씩 따라 하기</button>
@@ -256,7 +258,7 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
       <h3>탐색기에 키 넣기</h3>
       <div class="b">
         <p><b>안내를 연 앱·탐색기 화면이 이미 열려 있다면 그 화면으로 돌아가</b> 키를 붙여넣으세요.</p>
-        <p style="margin:4px 0 0">아직 탐색기를 안 열었다면 <a href="https://suronbeautiful-netizen.github.io/SS/" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700;white-space:nowrap">여기서 열기 ↗</a></p>
+        <p style="margin:4px 0 0">아직 탐색기를 안 열었다면 <a href="./" style="color:var(--accent);font-weight:700;white-space:nowrap">여기서 열기 →</a></p>
         <ul>
           <li>설치한 앱은 키가 없으면 설정이 자동으로 열려요. <b>브라우저에서는</b> 오른쪽 위 <span class="key">⚙</span>를 누르세요</li>
           <li><b>API 키 입력칸</b>에 키 붙여넣기 → <span class="key">완료</span></li>
@@ -393,7 +395,7 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
     vAll.addEventListener("click",function(){mode="all";paint();save();try{steps[cur].scrollIntoView({block:"start"});}catch(e){}});
     vOne.addEventListener("click",function(){mode="one";paint();save();try{card.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}});
     prevB.addEventListener("click",function(){go(cur-1,true);});
-    nextB.addEventListener("click",function(){if(cur>=N-1){try{window.open("https://suronbeautiful-netizen.github.io/SS/","_blank","noopener");}catch(e){}}else go(cur+1,true);});
+    nextB.addEventListener("click",function(){if(cur>=N-1){location.href="./";}else go(cur+1,true);});
     if("IntersectionObserver" in window){
       var io=new IntersectionObserver(function(ents){
         if(mode!=="all")return;
