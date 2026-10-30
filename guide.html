@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>학습 탐색기 API 키 안내</title>
+<script>try{if(localStorage.getItem("yx-guide-chose")!=="1")document.documentElement.className+=" first"}catch(e){document.documentElement.className+=" first"}</script>
 <style>
 /* 레이아웃: 좁은 단일 칼럼. 상단에 진행바, 본문은 '컴퓨터/폰' 꼬리표가 붙은 큰 단계 카드. 넉넉한 여백·큰 글씨로 비전문가가 따라가기 쉽게 */
 :root{
@@ -35,7 +36,7 @@
   --danger:#ff7a6b;
 }
 *{box-sizing:border-box}
-html,body{margin:0}
+html,body{margin:0;overflow-anchor:none}
 body{background:var(--bg);color:var(--fg);font:16.5px/1.55 var(--f);-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
 img{max-width:100%}
 [hidden]{display:none!important}
@@ -57,6 +58,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 /* 안내 카드 / 공통 카드 */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 section{margin-top:14px}
+#faq{margin-top:40px}
+#faq + section{margin-top:32px}
 .lead{font-size:16px;font-weight:800;margin:0 0 8px;display:flex;align-items:center;gap:9px}
 .lead .d{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
 
@@ -139,6 +142,36 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
 #stepctl button{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--fg);font:inherit;font-weight:700;font-size:15px;padding:13px 8px;border-radius:11px;cursor:pointer}
 #stepctl button:disabled{opacity:.38;cursor:default}
 #stepat{flex:none;color:var(--mu);font-size:13.5px;font-weight:800;min-width:46px;text-align:center}
+/* 처음 방문 때만 보이는 보기 방식 선택 카드 */
+#choose{margin:14px 0 0}
+.ch-q{margin:0;font-size:18px;font-weight:800;line-height:1.35}
+.ch-s{margin:4px 0 0;font-size:14.5px;color:var(--mu)}
+.ch-s .dn{color:var(--accent);font-weight:800}
+.ch-n{margin:10px 0 0;font-size:13px;color:var(--mu)}
+/* 첫 방문(선택 전): 스크립트 실행을 기다리지 않고 처음부터 선택 카드만 보이게 함. 'first' 표시는 스크립트가 켜질 때만 붙으므로, JS가 실패해도 전체 안내는 그대로 보임 */
+html.first #choose[hidden]{display:block!important}
+html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl,html.first #cklist,html.first #prog{display:none!important}
+.ch-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));grid-auto-rows:1fr;gap:10px;margin-top:12px}
+.ch-card{display:flex;align-items:stretch;gap:12px;text-align:left;background:var(--surface);color:var(--fg);border:1.5px solid color-mix(in srgb,var(--faint) 65%,var(--line));border-radius:var(--r);padding:16px;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ch-t{display:flex;flex-direction:column;align-items:flex-start;gap:6px;flex:1;min-width:0}
+.ch-arr{flex:none;align-self:center;color:var(--accent);font-size:22px;font-weight:800;line-height:1}
+.ch-card:active{background:var(--surface2)}
+.ch-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ch-card b{font-size:17px;font-weight:800;line-height:1.3}
+.ch-card .ch-d{font-size:14.5px;color:var(--mu);line-height:1.5}
+.ch-tag{display:inline-block;font-size:12.5px;font-weight:700;line-height:1.4;padding:2px 10px;border-radius:999px;background:var(--accent-weak);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.ch-tag.none{visibility:hidden}
+/* 카드 안 미니 미리보기: 누르면 보게 될 화면을 작게 그림 (색은 모두 회색 계열 — 선택된 것처럼 보이지 않게) */
+.ch-th{flex:none;align-self:center;width:62px;height:76px;border-radius:9px;background:var(--surface2);border:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:4px}
+.ch-th i{display:block;height:5px;border-radius:3px;background:color-mix(in srgb,var(--faint) 45%,var(--surface2))}
+.ch-th i.h{height:7px;width:60%;background:var(--faint)}
+.ch-th .bx1{flex:1;display:flex;flex-direction:column;gap:4px;padding:5px;border-radius:5px;background:var(--surface);border:1px solid var(--line)}
+.ch-th .bx1 i.s{width:70%}
+.ch-th .pl{margin-top:auto;align-self:flex-end;width:24px;height:8px;border-radius:5px;background:var(--faint)}
+.ch-th .rw{display:flex;align-items:center;gap:3px}
+.ch-th .rw u{flex:none;width:5px;height:5px;border-radius:2px;background:var(--faint)}
+.ch-th .rw i{flex:1}
+@media(max-width:349px){.ch-th{display:none}}
 </style>
 </head>
 <body>
@@ -158,7 +191,7 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
   <!-- PART 1 -->
   <div class="part" id="api-key" style="margin-top:18px">
     <div>
-      <h2>API 키 발급받기 <span class="tag pc">💻 컴퓨터</span></h2>
+      <h2>API 키 발급받기 <span class="tag pc">💻 컴퓨터 권장</span></h2>
       <div class="sub">약 5~10분 · 최초 한 번만</div>
     </div>
   </div>
@@ -172,7 +205,31 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
     <span>카드 등록이나 <b>‘무료 체험 시작’</b>은 필요하지 않아요. <b>결제 안내가 나오면 진행하지 말고</b> 그냥 두세요.</span>
   </div>
 
-  <a class="go" href="./" style="margin-top:10px">← 탐색기 화면으로 돌아가기</a>
+  <div id="choose" role="group" aria-labelledby="chq" hidden>
+    <p class="ch-q" id="chq">어떤 방식으로 안내받으시겠어요?</p>
+    <p class="ch-s">아래 둘 중 하나를 눌러 주세요 <span class="dn" aria-hidden="true">↓</span> 한 번만 고르면 돼요.</p>
+    <div class="ch-cards">
+      <button type="button" class="ch-card" id="cOne">
+        <span class="ch-th" aria-hidden="true"><i class="h"></i><span class="bx1"><i class="h"></i><i></i><i class="s"></i><u class="pl"></u></span></span>
+        <span class="ch-t">
+          <span class="ch-tag">처음 이용할 때 추천</span>
+          <b>한 단계씩 따라 하기</b>
+          <span class="ch-d">설명을 하나씩 읽고 ‘다음’을 눌러 진행해요.</span>
+        </span>
+        <span class="ch-arr" aria-hidden="true">→</span>
+      </button>
+      <button type="button" class="ch-card" id="cAll">
+        <span class="ch-th" aria-hidden="true"><i class="h"></i><span class="rw"><u></u><i></i></span><span class="rw"><u></u><i></i></span><span class="rw"><u></u><i></i></span><span class="rw"><u></u><i></i></span><span class="rw"><u></u><i></i></span><span class="rw"><u></u><i></i></span></span>
+        <span class="ch-t">
+          <span class="ch-tag none" aria-hidden="true">&nbsp;</span>
+          <b>전체 안내 보기</b>
+          <span class="ch-d">6단계를 한 번에 펼쳐 놓고 필요한 곳으로 이동해요.</span>
+        </span>
+        <span class="ch-arr" aria-hidden="true">→</span>
+      </button>
+    </div>
+    <p class="ch-n">나중에도 언제든 바꿀 수 있어요.</p>
+  </div>
 
   <div id="viewtoggle" role="group" aria-label="보기 방식">
     <button type="button" id="vAll" class="vt" aria-pressed="true">전체 안내 보기</button>
@@ -280,6 +337,8 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
     <div class="note mut"><span class="ic">i</span><span>키는 <b>기기·브라우저마다 따로</b> 저장돼요. 폰과 컴퓨터에서 모두 쓰려면 각각 한 번씩 넣어 주세요.</span></div>
   </div>
 
+  <a class="go" href="./" style="margin-top:10px">← 탐색기 화면으로 돌아가기</a>
+
   <section id="faq">
     <h2 style="font-size:19px;font-weight:800;margin-bottom:8px">자주 묻는 질문</h2>
     <details class="faq">
@@ -307,7 +366,7 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
     </details>
   </section>
 
-  <section>
+  <section id="cklist">
     <div class="card">
       <p class="lead"><span class="d"></span>설정 체크리스트</p>
       <label class="ck"><input type="checkbox"><span>프로젝트 만들고 YouTube Data API v3 켜기</span></label>
@@ -375,7 +434,10 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
     var nav=document.getElementById("stepnav"), ctl=document.getElementById("stepctl");
     var vAll=document.getElementById("vAll"), vOne=document.getElementById("vOne");
     var prevB=document.getElementById("prev"), nextB=document.getElementById("next"), atL=document.getElementById("stepat");
-    var mode="all", cur=0;
+    var mode="all", cur=0, chosen=false;
+    var chooseEl=document.getElementById("choose"), tog=document.getElementById("viewtoggle");
+    var cOne=document.getElementById("cOne"), cAll=document.getElementById("cAll"), ckSec=document.getElementById("cklist");
+    try{chosen=localStorage.getItem("yx-guide-chose")==="1";}catch(e){}
     try{mode=localStorage.getItem("yx-guide-mode")||"all";var cs=parseInt(localStorage.getItem("yx-guide-step"),10);if(cs>=0&&cs<N)cur=cs;}catch(e){}
     var chips=steps.map(function(s,i){
       var c=document.createElement("button");c.type="button";c.className="chip";c.textContent=String(i+1);
@@ -385,20 +447,26 @@ footer{color:var(--faint);font-size:14px;line-height:1.6;margin:24px 0 36px;padd
     function save(){try{localStorage.setItem("yx-guide-mode",mode);localStorage.setItem("yx-guide-step",String(cur));}catch(e){}}
     function paintChips(){chips.forEach(function(c,i){c.classList.toggle("cur",i===cur);});}
     function paint(){
+      root.classList.remove("first");
+      chooseEl.hidden=chosen;tog.hidden=!chosen;card.hidden=!chosen;ckSec.hidden=!chosen;prog.hidden=!chosen;
+      if(!chosen){nav.style.display="none";ctl.hidden=true;return;}
       vAll.setAttribute("aria-pressed",mode==="all");vOne.setAttribute("aria-pressed",mode==="one");
       nav.style.display=mode==="one"?"flex":"none";
-      if(mode==="one"){card.classList.add("one");ctl.hidden=false;prevB.disabled=cur<=0;nextB.textContent=cur>=N-1?"탐색기 열기 ↗":"다음 →";atL.textContent="단계 "+(cur+1)+" / "+N;}
+      if(mode==="one"){card.classList.add("one");ctl.hidden=false;prevB.disabled=cur<=0;nextB.textContent=cur>=N-1?"탐색기 열기 →":"다음 →";atL.textContent="단계 "+(cur+1)+" / "+N;}
       else{card.classList.remove("one");ctl.hidden=true;}
       steps.forEach(function(s,i){s.classList.toggle("act",i===cur);});paintChips();
     }
     function go(i,user){if(i<0||i>=N)return;cur=i;paint();save();requestAnimationFrame(function(){try{(mode==="one"?card:steps[i]).scrollIntoView({behavior:user?"smooth":"auto",block:"start"});}catch(e){}});}
     vAll.addEventListener("click",function(){mode="all";paint();save();try{steps[cur].scrollIntoView({block:"start"});}catch(e){}});
     vOne.addEventListener("click",function(){mode="one";paint();save();try{card.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}});
+    function choose(m){mode=m;cur=0;chosen=true;try{localStorage.setItem("yx-guide-chose","1");}catch(e){}paint();save();requestAnimationFrame(function(){try{card.scrollIntoView({behavior:"smooth",block:"start"});}catch(e){}});}
+    cOne.addEventListener("click",function(){choose("one");});
+    cAll.addEventListener("click",function(){choose("all");});
     prevB.addEventListener("click",function(){go(cur-1,true);});
     nextB.addEventListener("click",function(){if(cur>=N-1){location.href="./";}else go(cur+1,true);});
     if("IntersectionObserver" in window){
       var io=new IntersectionObserver(function(ents){
-        if(mode!=="all")return;
+        if(mode!=="all"||!chosen)return;
         ents.forEach(function(en){if(en.isIntersecting){var i=steps.indexOf(en.target);if(i>=0&&i!==cur){cur=i;paintChips();save();}}});
       },{rootMargin:"-45% 0px -45% 0px",threshold:0});
       steps.forEach(function(s){io.observe(s);});
