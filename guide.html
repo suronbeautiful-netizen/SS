@@ -495,7 +495,7 @@ html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl
     cOne.addEventListener("click",function(){choose("one");});
     cAll.addEventListener("click",function(){choose("all");});
     prevB.addEventListener("click",function(){go(cur-1,true);});
-    nextB.addEventListener("click",function(){if(cur>=N-1){location.href="./";}else go(cur+1,true);});
+    nextB.addEventListener("click",function(){if(cur>=N-1){toApp();}else go(cur+1,true);});
     if("IntersectionObserver" in window){
       var io=new IntersectionObserver(function(ents){
         if(mode!=="all"||!chosen)return;
@@ -506,7 +506,20 @@ html.first #steps,html.first #viewtoggle,html.first #stepnav,html.first #stepctl
     paint();
   }
   function openFaq(){var d=document.getElementById("faqd");if(d)d.open=true;}
-  [].slice.call(document.querySelectorAll('a[href="#faq"]')).forEach(function(a){a.addEventListener("click",openFaq);});
+  [].slice.call(document.querySelectorAll('a[href="#faq"]')).forEach(function(a){a.addEventListener("click",function(e){
+    e.preventDefault();openFaq(); // 주소 기록을 늘리지 않아야 '탐색기로' 복귀가 기존 화면으로 돌아간다
+    var t=document.getElementById("faq"),rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+    try{t.scrollIntoView({behavior:rm?"auto":"smooth",block:"start"});}catch(x){}
+  });});
+  // 탐색기로 돌아가기: 탐색기에서 왔다면 뒤로 가기(검색 화면 복원 가능), 아니면 새로 열기
+  var hBase=history.length;
+  function toApp(e){
+    var back=false;
+    try{back=!!document.referrer&&document.referrer.indexOf(location.origin)===0&&!/guide\.html/.test(document.referrer)&&history.length>1&&history.length===hBase;}catch(x){}
+    if(back){if(e)e.preventDefault();history.back();return;}
+    if(!e)location.href="./";
+  }
+  [].slice.call(document.querySelectorAll('a[href="./"]')).forEach(function(a){a.addEventListener("click",toApp);});
   if(location.hash==="#faq")openFaq();
   window.__yxOk=1;
 })();
